@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Executive Command Center | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --secondary: #2563eb;
+            --tertiary: #14b8a6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #06b6d4);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .ai-pulse {
+            animation: pulse-soft 2s infinite;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .cluster-bar {
+            transition: all 0.3s ease;
+        }
+        .cluster-bar:hover {
+            transform: scaleX(1.02);
+            transform-origin: left;
+        }
+        
+        .pivot-card {
+            transition: all 0.3s ease;
+        }
+        .pivot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-indigo-600 px-3 py-1 bg-indigo-100 rounded-full">Executive Command Center</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">A</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="font-manrope font-extrabold text-3xl text-slate-900">Career Command Center</h2>
+                        <p class="text-slate-500 mt-1">Real-time intelligence: Your skills vs. market demand</p>
+                    </div>
+                    <button id="analyze-btn" onclick="window.analyzeWithAI()" class="p-2.5 bg-indigo-600 text-white border border-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span>Analyze with AI</span>
+                    </button>
+                    <button id="refresh-btn" onclick="window.location.reload()" class="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                        <span class="material-symbols-outlined text-slate-600">refresh</span>
+                    </button>
+                </div>
+
+                <!-- Executive Metrics TIER -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="metric-card bg-gradient-to-br from-indigo-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-indigo-600">bookmark</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Saved</span>
+                        </div>
+                        <p id="total-saved" class="text-4xl font-black text-slate-900 metric-value">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Jobs in your pipeline</p>
+                    </div>
+                    <div class="metric-card bg-gradient-to-br from-green-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-green-600">trending_up</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Avg Match</span>
+                        </div>
+                        <p id="avg-match" class="text-4xl font-black text-green-600 metric-value">--%</p>
+                        <p class="text-xs text-slate-400 mt-1">AI分析 match rate</p>
+                    </div>
+                    <div class="metric-card bg-gradient-to-br from-amber-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-amber-500">local_fire_department</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Top Demand</span>
+                        </div>
+                        <p id="top-demand" class="text-3xl font-black text-slate-900 metric-value">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Most requested skill</p>
+                    </div>
+                </div>
+
+                <!-- COMMAND CENTER: 3-Column Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Feature #1: Skill Radar Chart -->
+                    <div class="insight-card">
+                        <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">radar</span>
+                            Skill Alignment Radar
+                        </h3>
+                        <div class="chart-container relative" style="height: 320px;">
+                            <canvas id="radarChart"></canvas>
+                            <div id="radar-loading" class="absolute inset-0 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-slate-200 animate-spin">sync</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-3 text-center">Market Demand (dashed) vs. Your Skills (filled)</p>
+                    </div>
+
+                    <!-- Feature #2: Market Clusters -->
+                    <div class="insight-card">
+                        <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-600">pie_chart</span>
+                            Where Do I Fit?
+                        </h3>
+                        <div id="market-clusters" class="space-y-4">
+                            <!-- Clusters injected here -->
+                            <div class="animate-pulse space-y-4">
+                                <div class="h-8 bg-slate-100 rounded"></div>
+                                <div class="h-8 bg-slate-100 rounded"></div>
+                                <div class="h-8 bg-slate-100 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between text-sm">
+                            <span class="text-slate-500">Total Analyzed</span>
+                            <span id="total-analyzed" class="font-bold text-slate-900">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature #3: Bridge the Gap Action Plan -->
+                <div class="insight-card bg-gradient-to-br from-amber-50/50 to-white border-amber-200">
+                    <h3 class="font-bold text-xl text-slate-900 mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500">construction</span>
+                        Bridge the Gap: Action Plan
+                    </h3>
+                    <div id="bridge-gap" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Pivot strategy cards injected here -->
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-24 bg-slate-100 rounded-xl"></div>
+                            <div class="h-24 bg-slate-100 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let radarChart = null;
+
+        function generatePivotStrategy(skillName) {
+            const skill = skillName.toLowerCase();
+            
+            const strategies = {
+                'aws': "Emphasize your cloud architecture fundamentals. In interviews, draw parallels from your existing infrastructure experience and demonstrate rapid learning ability.",
+                'azure': "Frame your tech background as cloud-agnostic. Highlight your ability to adapt to any cloud platform.",
+                'gcp': "Position yourself as platform-agnostic. Emphasize that cloud concepts transfer across providers.",
+                'docker': "You likely have containerization experience. Discuss how Docker relates to deployment and DevOps workflows you've used.",
+                'kubernetes': "Pivot: 'I have strong Docker experience and understand container orchestration fundamentals. I'm actively upskilling in K8s.'",
+                'agile': "Frame your project management as Agile-adjacent. Discuss sprints, standups, and iterative delivery you've experienced.",
+                'scrum': "Highlight any team collaboration experience. Emphasize your ability to work in fast-paced, iterative environments.",
+                'react': "You have frontend foundations. Emphasize component-based thinking and state management concepts you know.",
+                'node': "Pivot: 'I'm a quick learner and have experience with JavaScript/JS frameworks. Node.js is my next upskill priority.'",
+                'python': "Strong analytical foundations. Discuss how you've used Python for scripting, automation, or data work.",
+                'sql': "Emphasize any data work. Database skills transfer across languages - highlight your query logic experience.",
+                'typescript': "You already know JavaScript - TypeScript is a natural evolution. Discuss your JS fundamentals confidently.",
+                'graphql': "Show eagerness to learn. Position API design experience as transferable to GraphQL concepts.",
+                'machine learning': "Any analytical or data project counts! Discuss how you've derived insights from data, even without formal ML.",
+                'ai': "Your tech background shows you can work with emerging tech. Express enthusiasm and rapid upskilling plans.",
+                'data': "Any analytics or Excel work counts! Highlight your data-driven decision making experience.",
+                'lead': "Frame any team lead or mentor experience. Technical leadership is still leadership."
+            };
+            
+            for (const [key, strategy] of Object.entries(strategies)) {
+                if (skill.includes(key)) {
+                    return strategy;
+                }
+            }
+            
+            return "Acknowledge this gap confidently in interviews. Express high willingness to upskill and mention a similar technology you learned rapidly in the past.";
+        }
+
+        // Auth Check
+        (async function() {
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {}
+
+            // Load Sidebar
+            fetch('/components/sidebar.html')
+                .then(r => r.text())
+                .then(html => {
+                    const container = document.getElementById('sidebar-container');
+                    container.innerHTML = html;
+                    container.querySelectorAll('script').forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                });
+        })();
+
+        // Show empty state on page load - wait for button click to analyze
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication only
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {}
+            
+            // Show empty state - wait for user to click analyze button
+            showNoData();
+        });
+
+        // AI Analysis Function - runs when button clicked
+        var hasAnalyzed = false;
+        
+        window.analyzeWithAI = async function() {
+            if (hasAnalyzed) return;
+            hasAnalyzed = true;
+            
+            const btn = document.getElementById('analyze-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span class="animate-pulse">Analyzing...</span>';
+                btn.classList.remove('bg-indigo-600');
+                btn.classList.add('bg-indigo-500');
+            }
+            
+            // Show analyzing state in radar
+            const radarLoading = document.getElementById('radar-loading');
+            if (radarLoading) {
+                radarLoading.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="relative">
+                            <span class="material-symbols-outlined text-5xl text-indigo-400 animate-pulse">psychology</span>
+                            <div class="absolute -bottom-2 -right-2 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
+                        </div>
+                        <p class="text-indigo-600 font-medium animate-pulse">Analyzing your saved jobs...</p>
+                    </div>
+                `;
+            }
+            
+            try {
+                // Fetch data
+                const [resumeRes, searchRes] = await Promise.all([
+                    fetch('/api/resume/insights', { credentials: 'include' }),
+                    fetch('/api/search/insights', { credentials: 'include' })
+                ]);
+                
+                const resumeData = resumeRes.ok ? await resumeRes.json() : {};
+                const searchData = searchRes.ok ? await searchRes.json() : {};
+                
+                console.log('[Insights] Basic data:', { resumeData, searchData });
+                
+                // Run AI analysis
+                const analyzeRes = await fetch('/api/search/analyze', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                const analyzeData = analyzeRes.ok ? await analyzeRes.json() : {};
+                console.log('[AI Analysis] Result:', analyzeData);
+                
+                // Check for errors first
+                if (searchData.total_analyzed === 0 || searchData.message) {
+                    showNoData();
+                    return;
+                }
+                
+                // Use existing render function which handles all UI properly
+                renderCommandCenter(resumeData, searchData);
+                
+                // Update button
+                if (btn) {
+                    btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span><span>AI Analyzed</span>';
+                    btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    btn.classList.add('bg-green-600');
+                    btn.disabled = true;
+                }
+                
+            } catch (err) {
+                console.error('[AI Analysis] Error:', err);
+                showNoData();
+            }
+        }
+
+        function renderCommandCenter(resumeData, searchData) {
+            // Hide radar loading
+            document.getElementById('radar-loading').classList.add('hidden');
+            
+            // Update Metrics
+            document.getElementById('total-saved').textContent = resumeData.summary?.jobs_found || searchData?.total_analyzed || 0;
+            document.getElementById('avg-match').textContent = (resumeData.summary?.avg_match || searchData?.avg_match || '--') + '%';
+            document.getElementById('top-demand').textContent = resumeData.market_insights?.top_demanded?.[0] || searchData?.skills_demand ? Object.keys(searchData.skills_demand)[0] : '--';
+            
+            // Render Radar Chart
+            renderRadarChart(resumeData, searchData);
+            
+            // Render Market Clusters
+            renderMarketClusters(searchData);
+            
+            // Render Bridge the Gap
+            renderBridgeTheGap(resumeData);
+        }
+
+        function renderRadarChart(resumeData, searchData) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // Get top 6 skills from skill gaps
+            const skillGaps = resumeData.skill_gaps || [];
+            const labels = skillGaps.slice(0, 6).map(s => s.skill);
+            
+            if (labels.length === 0) {
+                labels = ['Python', 'JavaScript', 'AWS', 'React', 'SQL', 'Docker'];
+            }
+            
+            // Market demand (all 100)
+            const marketData = Array(labels.length).fill(100);
+            
+            // User skills (100 if matched, 20 if missing)
+            const userData = labels.map((label, i) => {
+                const gap = skillGaps[i];
+                if (gap && gap.status === 'matched') return 100;
+                return 25; // Give some credit so chart isn't flat
+            });
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Market Demand',
+                            data: marketData,
+                            borderColor: '#94a3b8',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            backgroundColor: 'transparent',
+                            pointBackgroundColor: '#94a3b8',
+                            pointRadius: 4,
+                        },
+                        {
+                            label: 'Your Skills',
+                            data: userData,
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.3)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#4f46e5',
+                            pointRadius: 5,
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 25,
+                                display: false
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            angleLines: {
+                                color: '#e2e8f0'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                },
+                                color: '#475569'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMarketClusters(searchData) {
+            const clusters = searchData?.market_clusters || {};
+            const total = searchData?.total_analyzed || 1;
+            
+            const clusterConfig = {
+                'Strong Match': { color: 'bg-green-500', label: '80%+ Match', icon: 'verified' },
+                'Developing': { color: 'bg-amber-400', label: '60-79% Match', icon: 'trending_up' },
+                'Entry Level': { color: 'bg-slate-400', label: '<60% Match', icon: 'trending_flat' },
+                'High Potential': { color: 'bg-indigo-500', label: '90%+ Match', icon: 'rocket' }
+            };
+            
+            const html = Object.entries(clusterConfig).map(([key, config]) => {
+                const count = clusters[key] || 0;
+                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                
+                return `
+                    <div class="fade-in-up" style="animation-delay: ${Math.random() * 0.3}s">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm ${config.color.replace('bg-', 'text-')}">${config.icon}</span>
+                                <span class="text-sm font-medium text-slate-700">${config.label}</span>
+                            </div>
+                            <span class="text-sm font-bold text-slate-900">${count} jobs</span>
+                        </div>
+                        <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full ${config.color} cluster-bar rounded-full" style="width: ${pct}%; transition: width 1s ease-out;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('market-clusters').innerHTML = html;
+            document.getElementById('total-analyzed').textContent = total;
+        }
+
+        function renderBridgeTheGap(resumeData) {
+            const skillGaps = resumeData.skill_gaps || [];
+            const missingSkills = skillGaps.filter(s => s.status === 'missing').slice(0, 4);
+            
+            if (missingSkills.length === 0) {
+                document.getElementById('bridge-gap').innerHTML = `
+                    <div class="col-span-2 text-center py-8">
+                        <span class="material-symbols-outlined text-5xl text-green-500 mb-4">check_circle</span>
+                        <p class="text-lg font-bold text-slate-900">Your Skills Are Market-Ready!</p>
+                        <p class="text-slate-500">No critical skill gaps found. Focus on applying to jobs.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = missingSkills.map((skill, i) => `
+                <div class="pivot-card bg-white rounded-xl border border-amber-200 p-4 fade-in-up" style="animation-delay: ${i * 0.1}s">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-amber-600 text-lg">warning</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">${skill.skill}</span>
+                                <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Missing</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                ${generatePivotStrategy(skill.skill)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('bridge-gap').innerHTML = html;
+        }
+
+        function showNoData() {
+            // Show waiting state in metrics area - don't hide the page structure
+            document.getElementById('total-saved').textContent = '--';
+            document.getElementById('avg-match').textContent = '--%';
+            document.getElementById('top-demand').textContent = '--';
+            
+            // Show loading in radar chart area
+            const radarLoading = document.getElementById('radar-loading');
+            if (radarLoading) {
+                radarLoading.classList.remove('hidden');
+                radarLoading.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <span class="material-symbols-outlined text-4xl text-indigo-300 animate-pulse">psychology</span>
+                        <p class="text-slate-400 text-sm">Click "Analyze with AI" to get insights</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

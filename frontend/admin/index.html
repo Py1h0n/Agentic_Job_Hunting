@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Curator | Operations Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#5551c2",
+                        "surface-variant": "#e0e3e6",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f7f9fd",
+                        "tertiary": "#3d37a9",
+                        "on-secondary-fixed": "#00201c",
+                        "inverse-surface": "#2d3134",
+                        "on-surface": "#181c1f",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#e2dfff",
+                        "on-background": "#181c1f",
+                        "on-tertiary-fixed": "#0f0069",
+                        "on-tertiary-fixed-variant": "#3b35a7",
+                        "surface": "#f7f9fd",
+                        "on-secondary-container": "#006f64",
+                        "on-surface-variant": "#464555",
+                        "surface-container-high": "#e6e8ec",
+                        "secondary": "#006b5f",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#c3c0ff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#c3c0ff",
+                        "primary-container": "#4f46e5",
+                        "surface-bright": "#f7f9fd",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#0f0069",
+                        "secondary-container": "#6df5e1",
+                        "surface-container-highest": "#e0e3e6",
+                        "on-tertiary-container": "#dbd7ff",
+                        "primary": "#3525cd",
+                        "surface-container": "#eceef2",
+                        "surface-tint": "#4d44e3",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#71f8e4",
+                        "on-secondary-fixed-variant": "#005048",
+                        "surface-container-low": "#f2f4f8",
+                        "secondary-fixed-dim": "#4fdbc8",
+                        "inverse-on-surface": "#eff1f5",
+                        "on-primary-container": "#dad7ff",
+                        "outline": "#777587",
+                        "surface-dim": "#d8dade",
+                        "tertiary-fixed": "#e2dfff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fd; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="flex flex-col h-screen w-[264px] border-r border-slate-200/50 dark:border-slate-800/50 bg-slate-50 dark:bg-slate-950 p-4 gap-2 fixed left-0 top-0 overflow-y-auto z-40">
+<div class="mb-8 px-2">
+<h1 class="font-manrope font-black text-indigo-700 dark:text-indigo-300 text-xl tracking-tighter">The Curator</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">Executive Portal</p>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-300 shadow-sm rounded-xl font-inter text-sm font-medium scale-[0.99] transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span>Best Matches</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+<span>All Jobs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span>Saved Jobs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Resume</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Insights</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:pl-4 transition-all duration-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-4 border-t border-slate-200/50">
+<div class="flex items-center gap-3 px-2 mb-6">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold">JD</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-900">Admin Console</span>
+<span class="text-[10px] text-green-500 font-medium">Status: Online</span>
+</div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors duration-200 font-inter text-sm font-medium cursor-pointer" onclick="handleLogout(event)">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Log Out</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 ml-[264px] bg-surface flex flex-col">
+<!-- TopAppBar Component -->
+<header class="flex justify-between items-center px-8 py-4 w-full bg-surface/60 backdrop-blur-md sticky top-0 z-30">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-indigo-600 transition-colors">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 text-on-surface placeholder:text-slate-400 shadow-sm transition-all duration-200" placeholder="Search operations, users, or logs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<button class="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<button class="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200/50"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface">Operations Desk</p>
+<p class="text-[10px] text-indigo-600">Region: US-East-1</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="px-10 py-8 max-w-7xl w-full mx-auto space-y-8">
+<!-- Hero Header -->
+<section class="flex flex-col gap-2">
+<h2 class="font-manrope text-4xl font-extrabold tracking-tight text-on-surface">Operations Console</h2>
+<p class="text-on-surface-variant font-medium opacity-80">Real-time monitoring of the curation engine and match fidelity.</p>
+</section>
+<!-- KPI Row: Bento Style -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-indigo-50 rounded-lg">
+<span class="material-symbols-outlined text-indigo-600" data-icon="group">group</span>
+</div>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+12%</span>
+</div>
+<p class="text-slate-500 text-xs font-semibold mb-1">Total Active Users</p>
+<h3 class="font-manrope text-2xl font-bold text-on-surface">12,482</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-teal-50 rounded-lg">
+<span class="material-symbols-outlined text-teal-600" data-icon="description">description</span>
+</div>
+<span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">Optimal</span>
+</div>
+<p class="text-slate-500 text-xs font-semibold mb-1">Resumes Processed</p>
+<h3 class="font-manrope text-2xl font-bold text-on-surface">845,920</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-amber-50 rounded-lg">
+<span class="material-symbols-outlined text-amber-600" data-icon="speed">speed</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400">Stable</span>
+</div>
+<p class="text-slate-500 text-xs font-semibold mb-1">Success Rate</p>
+<h3 class="font-manrope text-2xl font-bold text-on-surface">99.82%</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-rose-50 rounded-lg">
+<span class="material-symbols-outlined text-rose-600" data-icon="bolt">bolt</span>
+</div>
+<span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Fast</span>
+</div>
+<p class="text-slate-500 text-xs font-semibold mb-1">Avg. Throughput</p>
+<h3 class="font-manrope text-2xl font-bold text-on-surface">4.2s</h3>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Resume Processing Panel (Asymmetric) -->
+<section class="lg:col-span-2 space-y-6">
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm border border-outline-variant/10">
+<div class="px-6 py-4 border-b border-surface-container flex justify-between items-center">
+<h4 class="font-manrope font-bold text-on-surface">Resume Processing Queue</h4>
+<span class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full uppercase tracking-tighter">Live Status</span>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-3 gap-4 mb-8">
+<div class="p-4 bg-surface-container-low rounded-lg">
+<p class="text-[10px] text-slate-500 font-bold uppercase mb-1">In Queue</p>
+<p class="text-xl font-manrope font-bold text-on-surface">142</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg border-l-4 border-indigo-500">
+<p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Active Extraction</p>
+<p class="text-xl font-manrope font-bold text-on-surface">18</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg">
+<p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Failed (24h)</p>
+<p class="text-xl font-manrope font-bold text-error">03</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end mb-2">
+<p class="text-xs font-semibold text-slate-600 uppercase">Processing Load Trend</p>
+<span class="text-[10px] text-slate-400">Measured in req/sec</span>
+</div>
+<!-- Mock Chart Visualization -->
+<div class="h-32 flex items-end gap-1 px-2">
+<div class="bg-indigo-100 w-full rounded-t-sm" style="height: 40%"></div>
+<div class="bg-indigo-100 w-full rounded-t-sm" style="height: 55%"></div>
+<div class="bg-indigo-200 w-full rounded-t-sm" style="height: 45%"></div>
+<div class="bg-indigo-300 w-full rounded-t-sm" style="height: 70%"></div>
+<div class="bg-indigo-400 w-full rounded-t-sm" style="height: 85%"></div>
+<div class="bg-indigo-500 w-full rounded-t-sm" style="height: 95%"></div>
+<div class="bg-indigo-600 w-full rounded-t-sm" style="height: 80%"></div>
+<div class="bg-indigo-400 w-full rounded-t-sm" style="height: 60%"></div>
+<div class="bg-indigo-200 w-full rounded-t-sm" style="height: 50%"></div>
+<div class="bg-indigo-300 w-full rounded-t-sm" style="height: 65%"></div>
+<div class="bg-indigo-500 w-full rounded-t-sm" style="height: 75%"></div>
+<div class="bg-indigo-700 w-full rounded-t-sm" style="height: 100%"></div>
+<div class="bg-indigo-400 w-full rounded-t-sm" style="height: 60%"></div>
+<div class="bg-indigo-200 w-full rounded-t-sm" style="height: 40%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-manrope font-bold text-on-surface">Extraction Failure Alerts</h4>
+<button class="text-indigo-600 text-xs font-bold hover:underline">View All Logs</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-4 bg-error-container/30 rounded-xl border border-error/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-xl" data-icon="warning">warning</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-error-container">Schema Mismatch Exception</p>
+<p class="text-[10px] text-slate-500">ID: res_89234 • User: Sarah Jenkins</p>
+</div>
+</div>
+<button class="px-3 py-1.5 bg-error text-white text-[10px] font-bold rounded-lg uppercase tracking-tight">Retry Manually</button>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-4 opacity-60">
+<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500 text-xl" data-icon="cloud_off">cloud_off</span>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-700">Timeout: External API</p>
+<p class="text-[10px] text-slate-500">ID: res_89110 • Resolved 4m ago</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase">Resolved</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Match Quality & Operations -->
+<section class="space-y-8">
+<!-- Match Quality Card -->
+<div class="bg-white rounded-xl shadow-lg shadow-indigo-900/5 p-6 border border-indigo-50">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-indigo-600" data-icon="verified">verified</span>
+<h4 class="font-manrope font-bold text-on-surface">Match Quality</h4>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between text-xs font-bold mb-2">
+<span class="text-slate-500">Fidelity Score</span>
+<span class="text-indigo-600">98.4%</span>
+</div>
+<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-indigo-600 rounded-full" style="width: 98.4%"></div>
+</div>
+</div>
+<div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100/50">
+<p class="text-[10px] font-bold text-indigo-700 uppercase mb-3">Confidence Distribution</p>
+<ul class="space-y-3">
+<li class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium text-slate-600">High Confidence</span>
+</div>
+<span class="text-xs font-bold text-slate-900">82%</span>
+</li>
+<li class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+<span class="text-xs font-medium text-slate-600">Manual Review</span>
+</div>
+<span class="text-xs font-bold text-slate-900">14%</span>
+</li>
+<li class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-rose-500"></span>
+<span class="text-xs font-medium text-slate-600">Low Confidence</span>
+</div>
+<span class="text-xs font-bold text-slate-900">4%</span>
+</li>
+</ul>
+</div>
+<div class="pt-4 border-t border-slate-100">
+<button class="w-full py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 hover:bg-indigo-700 transition-colors">Adjust Match Parameters</button>
+</div>
+</div>
+</div>
+<!-- System Health Visual -->
+<div class="bg-slate-950 rounded-xl p-6 text-white overflow-hidden relative group">
+<div class="relative z-10">
+<h4 class="font-manrope font-bold text-indigo-400 mb-4">Core Engine Health</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Semantic Parser</span>
+<span class="text-[10px] text-green-400 font-bold px-2 py-0.5 bg-green-400/10 rounded">99.9% UP</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Vector DB</span>
+<span class="text-[10px] text-green-400 font-bold px-2 py-0.5 bg-green-400/10 rounded">12ms LATENCY</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-slate-400 font-bold uppercase">LLM Overlay</span>
+<span class="text-[10px] text-indigo-400 font-bold px-2 py-0.5 bg-indigo-400/10 rounded">OPTIMIZED</span>
+</div>
+</div>
+<div class="mt-6 flex justify-center">
+<div class="w-24 h-24 relative flex items-center justify-center">
+<div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+<div class="absolute inset-0 border-t-4 border-indigo-500 rounded-full animate-spin" style="animation-duration: 3s;"></div>
+<span class="text-xs font-bold">Stable</span>
+</div>
+</div>
+</div>
+<!-- Abstract glow -->
+<div class="absolute -right-12 -bottom-12 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl group-hover:bg-indigo-600/30 transition-colors"></div>
+</div>
+<!-- Low Confidence Flags -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-manrope font-bold text-on-surface text-sm">Low-Confidence Flags</h4>
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="help_outline">help_outline</span>
+</div>
+<div class="space-y-2">
+<div class="bg-surface-container-lowest p-3 rounded-lg flex items-center gap-3">
+<div class="w-2 h-8 bg-amber-400 rounded-full"></div>
+<div>
+<p class="text-[10px] font-bold text-slate-900">Senior Dev -&gt; Principal</p>
+<p class="text-[9px] text-slate-500">Exp Gap: 1.5 yrs • Score: 62%</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-3 rounded-lg flex items-center gap-3">
+<div class="w-2 h-8 bg-rose-400 rounded-full"></div>
+<div>
+<p class="text-[10px] font-bold text-slate-900">Marketing -&gt; Product</p>
+<p class="text-[9px] text-slate-500">Skill Pivot • Score: 48%</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Footer Component -->
+<footer class="mt-auto w-full border-t border-slate-200/50 bg-slate-50 py-8 px-10">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-1">
+<span class="font-manrope font-bold text-slate-900 text-sm">The Intelligent Curator</span>
+<span class="font-inter text-[10px] text-slate-500 uppercase tracking-widest">© 2024 The Intelligent Curator. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="font-inter text-xs text-slate-500 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline" href="#">Privacy Policy</a>
+<a class="font-inter text-xs text-slate-500 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline" href="#">Terms of Service</a>
+<a class="font-inter text-xs text-slate-500 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline" href="#">Cookie Policy</a>
+<a class="font-inter text-xs text-slate-500 hover:text-indigo-600 transition-colors underline-offset-4 hover:underline" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Contextual FAB - Restricted to Home/Dashboard contexts -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95 group z-50">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="absolute right-16 bg-slate-900 text-white text-[10px] px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold uppercase tracking-widest">New Operation</span>
+</button>
+<script>
+    async function handleLogout(e) {
+        e.preventDefault();
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch(err) {}
+        window.location.href = '/auth/login';
+    }
+</script>
+</body></html>

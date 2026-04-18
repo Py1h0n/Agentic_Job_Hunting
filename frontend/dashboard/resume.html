@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Resume | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        "primary-soft": "#eef2ff",
+                        secondary: "#2563eb",
+                        tertiary: "#14b8a6",
+                        background: "#f6f8fc",
+                        card: "#ffffff",
+                        "text-primary": "#0f172a",
+                        "text-secondary": "#475569",
+                        "text-muted": "#94a3b8",
+                        border: "#e2e8f0",
+                        success: "#22c55e",
+                        error: "#ef4444",
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Inter"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --secondary: #2563eb;
+            --tertiary: #14b8a6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+        
+        .progress-gradient {
+            background: linear-gradient(90deg, #4f46e5 0%, #22d3ee 100%);
+        }
+        
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .missing-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #fef3c7;
+            color: #d97706;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 2s linear infinite;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">Resume Analysis</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/dashboard/job-search.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">search</span>
+                    <span class="text-sm font-medium">Job Search</span>
+                </button>
+                <button onclick="window.location.href='/dashboard/best-matches.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">workspace_premium</span>
+                    <span class="text-sm font-medium">Best Matches</span>
+                </button>
+                <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-4xl mx-auto">
+                
+                <!-- Status Card -->
+                <div id="status-card" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-8 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div id="status-icon" class="w-12 h-12 rounded-xl flex items-center justify-center">
+                                <!-- Icon injected by JS -->
+                            </div>
+                            <div>
+                                <h3 id="status-title" class="font-bold text-slate-900 text-lg">Resume Status</h3>
+                                <p id="status-subtitle" class="text-sm text-slate-500">No resume uploaded</p>
+                            </div>
+                        </div>
+                        <div id="status-action" class="hidden">
+                            <button onclick="deleteResume()" class="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-1">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Section -->
+                <div id="upload-section" class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm mb-8">
+                    <h2 class="font-bold text-xl text-slate-900 mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">upload_file</span>
+                        Upload Your Resume
+                    </h2>
+                    
+                    <div id="drop-zone" class="drop-zone p-12 text-center cursor-pointer">
+                        <div id="upload-prompt">
+                            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl">cloud_upload</span>
+                            </div>
+                            <p class="text-lg font-medium text-slate-700 mb-2">Drop your resume here</p>
+                            <p class="text-sm text-slate-500 mb-4">or click to browse</p>
+                            <p class="text-xs text-slate-400">Supports: PDF, JPG, PNG, DOC, DOCX (Max 10MB)</p>
+                        </div>
+                        
+                        <div id="upload-loading" class="hidden">
+                            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl text-indigo-600 animate-spin-slow">sync</span>
+                            </div>
+                            <p id="upload-status" class="text-lg font-medium text-slate-700 mb-2">Uploading...</p>
+                            <div class="w-48 h-2 bg-slate-100 rounded-full mx-auto overflow-hidden">
+                                <div id="progress-bar" class="h-full progress-gradient rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="file-input" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                </div>
+
+                <!-- Extraction Results -->
+                <div id="extraction-results" class="hidden space-y-6">
+                    <!-- Skills Card -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm fade-in">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">psychology</span>
+                            Extracted Skills
+                        </h3>
+                        <div id="skills-list" class="flex flex-wrap gap-2">
+                            <!-- Skills injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Experience Card -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm fade-in">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">work</span>
+                            Work Experience
+                        </h3>
+                        <p id="experience-text" class="text-slate-700">--</p>
+                    </div>
+
+                    <!-- Education Card -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm fade-in">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">school</span>
+                            Education
+                        </h3>
+                        <div id="education-list" class="space-y-2">
+                            <!-- Education injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Missing Skills Card -->
+                    <div id="missing-skills-card" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm fade-in hidden">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-600">warning</span>
+                            Skills to Develop
+                        </h3>
+                        <p class="text-sm text-slate-500 mb-3">Based on your saved jobs, consider learning:</p>
+                        <div id="missing-skills-list" class="flex flex-wrap gap-2">
+                            <!-- Missing skills injected here -->
+                        </div>
+                    </div>
+
+                    <!-- AI Summary Panel -->
+                    <div class="bg-gradient-to-r from-indigo-50 to-cyan-50 rounded-2xl p-6 border border-indigo-100 shadow-sm fade-in">
+                        <h3 class="font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">auto_awesome</span>
+                            AI Summary
+                        </h3>
+                        <p id="ai-summary" class="text-slate-700 leading-relaxed">--</p>
+                    </div>
+
+                    <!-- CTA to Insights -->
+                    <div class="flex justify-center">
+                        <button onclick="switchTab('insights')" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all hover:scale-105">
+                            <span class="material-symbols-outlined">trending_up</span>
+                            View Best Matches
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="text-center py-12">
+                    <div class="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-400 mx-auto mb-4">
+                        <span class="material-symbols-outlined text-5xl">description</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">No Resume Yet</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto">
+                        Upload your resume to get AI-powered job matching and discover your best career opportunities.
+                    </p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('sidebar-container').innerHTML = '<div class="h-full flex items-center justify-center"><span class="material-symbols-outlined text-slate-400 animate-spin">sync</span></div>';
+        // Load sidebar with script execution
+        fetch('/components/sidebar.html')
+            .then(r => r.text())
+            .then(html => {
+                const container = document.getElementById('sidebar-container');
+                container.innerHTML = html;
+                // Re-execute scripts since innerHTML doesn't execute them
+                container.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(err => {
+                console.error('Failed to load sidebar:', err);
+            });
+
+        const STATE = {
+            IDLE: 'idle',
+            UPLOADING: 'uploading',
+            EXTRACTING: 'extracting',
+            ANALYZING: 'analyzing',
+            READY: 'ready'
+        };
+        
+        let currentState = STATE.IDLE;
+        let currentResume = null;
+
+        // Navigation
+        function switchTab(tab) {
+            if (tab === 'job-search') {
+                window.location.href = '/dashboard/job-search.html';
+            } else if (tab === 'insights') {
+                window.location.href = '/dashboard/insights.html';
+            }
+        }
+
+        // Load resume on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Auth check
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {
+                // Continue on network error
+            }
+            
+            await loadResume();
+        });
+
+        async function loadResume() {
+            try {
+                const res = await fetch('/api/resume', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        currentResume = data;
+                        renderResume(data);
+                    } else {
+                        showEmptyState();
+                    }
+                } else {
+                    showEmptyState();
+                }
+            } catch (err) {
+                console.error('Failed to load resume:', err);
+                showEmptyState();
+            }
+        }
+
+        function renderResume(resume) {
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('status-card').classList.remove('hidden');
+            document.getElementById('extraction-results').classList.remove('hidden');
+            document.getElementById('status-action').classList.remove('hidden');
+
+            // Status icon
+            const iconContainer = document.getElementById('status-icon');
+            iconContainer.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-green-100';
+            iconContainer.innerHTML = '<span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>';
+            
+            document.getElementById('status-title').textContent = 'Resume Uploaded';
+            document.getElementById('status-subtitle').textContent = resume.filename || 'Resume on file';
+
+            // Skills
+            const skillsList = document.getElementById('skills-list');
+            if (resume.skills && resume.skills.length > 0) {
+                skillsList.innerHTML = resume.skills.map(s => `<span class="skill-tag">${s}</span>`).join('');
+            } else {
+                skillsList.innerHTML = '<span class="text-slate-400 text-sm">No skills extracted</span>';
+            }
+
+            // Experience
+            document.getElementById('experience-text').textContent = resume.experience || 'Not specified';
+
+            // Education
+            const eduList = document.getElementById('education-list');
+            if (resume.education && resume.education.length > 0) {
+                eduList.innerHTML = resume.education.map(e => {
+                    const degree = e.degree || '';
+                    const institution = e.institution || '';
+                    const year = e.year || '';
+                    return `<p class="text-slate-700">${degree}${institution ? ' - ' + institution : ''}${year ? ' (' + year + ')' : ''}</p>`;
+                }).join('');
+            } else {
+                eduList.innerHTML = '<span class="text-slate-400 text-sm">No education data found</span>';
+            }
+
+            // AI Summary
+            document.getElementById('ai-summary').textContent = resume.summary || 'No summary available';
+
+            // Load missing skills from insights
+            loadMissingSkills();
+        }
+
+        async function loadMissingSkills() {
+            try {
+                const res = await fetch('/api/resume/insights', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.skill_gaps && data.skill_gaps.length > 0) {
+                        const missingSkills = data.skill_gaps.filter(s => s.status === 'missing');
+                        if (missingSkills.length > 0) {
+                            document.getElementById('missing-skills-card').classList.remove('hidden');
+                            const missingList = document.getElementById('missing-skills-list');
+                            missingList.innerHTML = missingSkills
+                                .map(s => `<span class="missing-tag">${s.skill || s.required}</span>`)
+                                .join('');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load insights:', err);
+            }
+        }
+
+        function showEmptyState() {
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('upload-section').classList.remove('hidden');
+            document.getElementById('status-card').classList.add('hidden');
+            document.getElementById('extraction-results').classList.add('hidden');
+        }
+
+        // File upload handling
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 
+                              'application/msword', 
+                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            
+            if (!validTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload PDF, JPG, PNG, or DOC/DOCX.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large. Maximum 10MB allowed.');
+                return;
+            }
+
+            setUploadState(STATE.UPLOADING);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/resume/upload', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentResume = data.analysis;
+                    renderResume({
+                        ...data.analysis,
+                        filename: data.filename
+                    });
+                } else {
+                    const err = await res.json();
+                    alert('Upload failed: ' + (err.detail || 'Unknown error'));
+                    setUploadState(STATE.IDLE);
+                }
+            } catch (err) {
+                console.error('Upload error:', err);
+                alert('Upload failed. Please try again.');
+                setUploadState(STATE.IDLE);
+            }
+        }
+
+        function setUploadState(state) {
+            currentState = state;
+            const prompt = document.getElementById('upload-prompt');
+            const loading = document.getElementById('upload-loading');
+            const status = document.getElementById('upload-status');
+            const progress = document.getElementById('progress-bar');
+
+            if (state === STATE.UPLOADING) {
+                prompt.classList.add('hidden');
+                loading.classList.remove('hidden');
+                status.textContent = 'Uploading...';
+                progress.style.width = '30%';
+            } else if (state === STATE.EXTRACTING) {
+                status.textContent = 'Extracting text...';
+                progress.style.width = '50%';
+            } else if (state === STATE.ANALYZING) {
+                status.textContent = 'Analyzing with AI...';
+                progress.style.width = '80%';
+            } else {
+                prompt.classList.remove('hidden');
+                loading.classList.add('hidden');
+                progress.style.width = '0%';
+            }
+        }
+
+        async function deleteResume() {
+            if (!confirm('Delete your resume? You can upload a new one anytime.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/resume', {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    currentResume = null;
+                    showEmptyState();
+                } else {
+                    alert('Failed to delete resume.');
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Failed to delete resume.');
+            }
+        }
+    </script>
+</body>
+</html>

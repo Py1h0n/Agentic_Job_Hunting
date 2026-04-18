@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Saved Jobs | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .job-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+            border-color: var(--primary);
+        }
+
+        .match-badge {
+            font-weight: 800;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .match-high { background: #ecfdf5; color: #059669; }
+        .match-medium { background: #fffbeb; color: #d97706; }
+        .match-low { background: #f1f5f9; color: #64748b; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .job-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">Saved Jobs</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/dashboard/job-search.html'" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm text-white">search</span>
+                    New Search
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-2">My Collections</h2>
+                        <p class="text-slate-500 font-medium">You have <span id="saved-count" class="text-indigo-600">0</span> jobs saved for follow-up.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="clearAllSaved()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-white transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">delete_sweep</span>
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                    <div class="w-24 h-24 bg-indigo-50 rounded-3xl flex items-center justify-center text-indigo-600 mb-6">
+                        <span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Your collection is empty</h3>
+                    <p class="text-slate-500 text-sm max-w-md leading-relaxed mb-8">
+                        Browse opportunities and save the ones that catch your eye. Your personalized career list will appear here.
+                    </p>
+                    <button onclick="window.location.href='/dashboard/job-search.html'" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20">
+                        Start Exploring
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="job-card h-48 skeleton"></div>
+                    <div class="job-card h-48 skeleton"></div>
+                    <div class="job-card h-48 skeleton"></div>
+                </div>
+
+                <!-- Results Grid -->
+                <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let allJobs = [];
+
+        async function init() {
+            try {
+                // Auth check
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+
+                // Load sidebar
+                fetch('/components/sidebar.html')
+                    .then(r => r.text())
+                    .then(html => {
+                        const container = document.getElementById('sidebar-container');
+                        container.innerHTML = html;
+                        container.querySelectorAll('script').forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            newScript.textContent = oldScript.textContent;
+                            document.body.appendChild(newScript);
+                        });
+                    });
+
+                await loadSavedJobs();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadSavedJobs() {
+            try {
+                const res = await fetch('/api/search/saved', { credentials: 'include' });
+                const data = await res.json();
+                allJobs = data.data || [];
+                
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('saved-count').textContent = allJobs.length;
+
+                if (allJobs.length === 0) {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                    document.getElementById('results-grid').classList.add('hidden');
+                } else {
+                    document.getElementById('empty-state').classList.add('hidden');
+                    document.getElementById('results-grid').classList.remove('hidden');
+                    renderJobs();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderJobs() {
+            const container = document.getElementById('results-grid');
+            container.innerHTML = '';
+
+            allJobs.forEach((job, index) => {
+                const card = document.createElement('article');
+                card.className = 'job-card';
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                const matchScore = job.match_score || 0;
+                let matchClass = 'match-low';
+                if (matchScore >= 80) matchClass = 'match-high';
+                else if (matchScore >= 60) matchClass = 'match-medium';
+
+                const companyInitial = job.company ? job.company.charAt(0).toUpperCase() : '?';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                ${companyInitial}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg leading-tight mb-1">${job.title}</h3>
+                                <p class="text-sm text-slate-600 font-medium">${job.company}</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleSave(${job.id})" class="p-2 text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Unsave">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+                        </button>
+                    </div>
+
+                    ${job.location ? `<p class="flex items-center gap-1.5 text-sm text-slate-500 mb-4"><span class="material-symbols-outlined text-sm">location_on</span>${job.location}</p>` : ''}
+
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Compatibility</span>
+                            <span class="text-xs font-black text-indigo-600">${matchScore}%</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-600 rounded-full" style="width: ${matchScore}%"></div>
+                        </div>
+                    </div>
+
+                    ${job.skills ? `
+                        <div class="flex flex-wrap gap-1.5 mb-6">
+                            ${job.skills.split(',').slice(0, 4).map(s => `<span class="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded-lg">${s.trim()}</span>`).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div class="flex items-center gap-3">
+                        <a href="${job.url}" target="_blank" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-center text-sm font-bold hover:bg-slate-800 transition-all">
+                            View Opportunity
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function toggleSave(jobId) {
+            try {
+                await fetch(`/api/search/jobs/${jobId}/save`, { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                await loadSavedJobs();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function clearAllSaved() {
+            if (!confirm('Are you sure you want to unsave all jobs?')) return;
+            
+            try {
+                // Fetch current saved jobs list and toggle each
+                // Ideally this would be a single API call, but let's use the loop for now
+                for (const job of allJobs) {
+                    await fetch(`/api/search/jobs/${job.id}/save`, { 
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                }
+                await loadSavedJobs();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

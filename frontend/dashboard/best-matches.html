@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AI Insights | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        "primary-soft": "#eef2ff",
+                        secondary: "#2563eb",
+                        tertiary: "#14b8a6",
+                        background: "#f6f8fc",
+                        card: "#ffffff",
+                        "text-primary": "#0f172a",
+                        "text-secondary": "#475569",
+                        "text-muted": "#94a3b8",
+                        border: "#e2e8f0",
+                        success: "#22c55e",
+                        error: "#ef4444",
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Inter"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --secondary: #2563eb;
+            --tertiary: #14b8a6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .job-rank-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .job-rank-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+        }
+        .job-rank-card.rank-1 {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+            box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.3);
+        }
+        
+        .match-badge {
+            font-weight: 700;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+        .match-high { 
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+        }
+        .match-medium { 
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .match-low { 
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .skill-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .missing-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #fef3c7;
+            color: #d97706;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .strength-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .analyzing {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .progress-bar {
+            animation: progress 2s ease-in-out infinite;
+        }
+        
+        .job-appear {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+        
+        .streaming-badge {
+            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">AI Insights</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/dashboard/job-search.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">search</span>
+                    <span class="text-sm font-medium">Job Search</span>
+                </button>
+                <button onclick="window.location.href='/dashboard/resume.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="text-sm font-medium">Resume</span>
+                </button>
+                <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-5xl mx-auto">
+                
+                <!-- Summary Card -->
+                <div id="summary-card" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="flex-1">
+                            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">AI Job Analysis</h2>
+                            <select id="search-picker" class="w-full mt-1 border-slate-200 rounded-xl text-lg font-bold text-slate-900 bg-slate-50 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Recent Jobs</option>
+                            </select>
+                            <button onclick="loadData()" class="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg flex items-center gap-2">
+                                <span class="material-symbols-outlined">psychology</span>
+                                Analyze with AI
+                            </button>
+                        </div>
+                        <div class="flex gap-6">
+                            <div class="text-center">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total Jobs</p>
+                                <p id="total-jobs" class="text-2xl font-bold text-slate-900">--</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Avg Match</p>
+                                <p id="avg-match" class="text-2xl font-bold text-indigo-600">--</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Strong Matches</p>
+                                <p id="high-matches" class="text-2xl font-bold text-green-600">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading / Analyzing State -->
+                <div id="loading-state" class="hidden">
+                    <div class="text-center py-16">
+                        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span class="material-symbols-outlined text-5xl text-indigo-600 analyzing">psychology</span>
+                        </div>
+                        <h3 id="loading-title" class="text-xl font-bold text-slate-900 mb-2">Analyzing Jobs with AI...</h3>
+                        <p id="loading-desc" class="text-slate-500 text-sm max-w-md mx-auto">
+                            Our AI is analyzing your resume against all searched jobs to find the best matches.
+                        </p>
+                        <!-- Streaming progress -->
+                        <div id="stream-progress" class="hidden mt-6 max-w-md mx-auto">
+                            <div class="flex justify-between text-sm text-slate-500 mb-2">
+                                <span id="progress-status">Processing...</span>
+                                <span id="progress-count">0/0</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <div id="progress-bar" class="h-full bg-indigo-600 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <!-- Live results preview -->
+                        <div id="live-results" class="hidden mt-8 text-left max-w-lg mx-auto">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="streaming-badge px-3 py-1 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                                    <span class="w-2 h-2 bg-white rounded-full"></span>
+                                    LIVE
+                                </span>
+                                <span class="text-sm text-slate-500">Jobs appearing as AI finishes...</span>
+                            </div>
+                            <div id="live-jobs-container" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Resume State -->
+                <div id="no-resume" class="hidden text-center py-16">
+                    <div class="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mx-auto mb-4">
+                        <span class="material-symbols-outlined text-5xl">error_outline</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">No Resume Found</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                        Upload your resume first to get AI-powered job recommendations.
+                    </p>
+                    <button onclick="window.location.href='/dashboard/resume.html'" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
+                        Upload Resume
+                    </button>
+                </div>
+
+                <!-- No Jobs State -->
+                <div id="no-jobs" class="hidden text-center py-16">
+                    <div class="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-400 mx-auto mb-4">
+                        <span class="material-symbols-outlined text-5xl">work_off</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">No Jobs to Analyze</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                        Run a job search first, then come back to see AI-powered recommendations.
+                    </p>
+                    <button onclick="window.location.href='/dashboard/job-search.html'" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
+                        Find Jobs
+                    </button>
+                </div>
+
+                <!-- AI Insights Section -->
+                <div id="insights-section" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-8 hidden">
+                    <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">auto_awesome</span>
+                        AI Insights
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Your Strengths</p>
+                            <div id="insight-strengths" class="flex flex-wrap gap-2">
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Skills to Learn</p>
+                            <div id="insight-missing" class="flex flex-wrap gap-2">
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Market Trends</p>
+                            <p id="insight-trends" class="text-sm text-slate-700">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobs List -->
+                <div id="jobs-list" class="space-y-4 mb-8 hidden">
+                    <h3 class="font-bold text-xl text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">emoji_events</span>
+                        AI-Ranked Jobs
+                    </h3>
+                    <!-- Job cards injected here -->
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Load sidebar
+        document.getElementById('sidebar-container').innerHTML = '<div class="h-full flex items-center justify-center"><span class="material-symbols-outlined text-slate-400 animate-spin">sync</span></div>';
+        fetch('/components/sidebar.html')
+            .then(r => r.text())
+            .then(html => {
+                const container = document.getElementById('sidebar-container');
+                container.innerHTML = html;
+                container.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(err => console.error('Failed to load sidebar:', err));
+
+        // Auth check
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {
+                // Continue on network error
+            }
+
+            // Load search history for dropdown
+            await loadSearchHistory();
+            // Just show the form, don't auto-analyze
+            showLoading();
+        });
+
+        async function loadSearchHistory() {
+            try {
+                const res = await fetch('/api/search/history?limit=10', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    const picker = document.getElementById('search-picker');
+                    
+                    // Keep the "All Recent Jobs" option
+                    picker.innerHTML = '<option value="">All Recent Jobs</option>';
+                    
+                    if (data.data) {
+                        data.data.forEach(h => {
+                            const opt = document.createElement('option');
+                            opt.value = h.session_id || h.id;
+                            opt.textContent = `${h.query} (${h.total_found || 0} jobs)`;
+                            picker.appendChild(opt);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load history:', e);
+            }
+        }
+
+        async function loadData() {
+            console.log('[Analyze] Button clicked, starting streaming analysis...');
+            
+            const sessionId = document.getElementById('search-picker').value;
+            let url = '/api/resume/analyze-jobs-stream?limit=20';
+            if (sessionId) {
+                url = `/api/resume/analyze-jobs-stream?session_id=${sessionId}&limit=20`;
+            }
+            console.log('[Analyze] Streaming URL:', url);
+            
+            try {
+                // Check resume first
+                const resumeRes = await fetch('/api/resume', { credentials: 'include' });
+                
+                if (!resumeRes.ok) {
+                    showNoResume();
+                    return;
+                }
+                
+                const resumeData = await resumeRes.json();
+                if (!resumeData) {
+                    showNoResume();
+                    return;
+                }
+
+                // Show loading with streaming UI
+                showStreaming();
+                
+                // Connect to streaming endpoint
+                const response = await fetch(url, { credentials: 'include' });
+                
+                if (!response.ok) {
+                    console.error('[Stream] API error:', response.status);
+                    showNoJobs();
+                    return;
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let allJobs = [];
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete SSE messages
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep incomplete line in buffer
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                handleStreamEvent(data, allJobs);
+                            } catch (e) {
+                                console.warn('[Stream] Parse error:', e);
+                            }
+                        }
+                    }
+                }
+                
+            } catch (err) {
+                console.error('[Analyze] Exception:', err);
+                showNoJobs();
+            }
+        }
+        
+        function handleStreamEvent(data, allJobs) {
+            console.log('[Stream] Event:', data.type, data);
+            
+            if (data.type === 'start') {
+                document.getElementById('progress-count').textContent = `0/${data.total}`;
+                document.getElementById('stream-progress').classList.remove('hidden');
+            }
+            
+            if (data.type === 'status') {
+                document.getElementById('progress-status').textContent = data.message;
+                document.getElementById('live-results').classList.remove('hidden');
+            }
+            
+            if (data.type === 'job') {
+                allJobs.push(data.job);
+                
+                // Update progress
+                const progress = ((data.index + 1) / data.total) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('progress-count').textContent = `${data.index + 1}/${data.total}`;
+                document.getElementById('progress-status').textContent = `Analyzing job ${data.index + 1}...`;
+                
+                // Add to live preview
+                addLiveJob(data.job, data.index);
+            }
+            
+            if (data.type === 'done') {
+                // Final render with sorted results
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('live-results').classList.add('hidden');
+                renderJobs(data.jobs, data.summary);
+            }
+            
+            if (data.error) {
+                document.getElementById('loading-title').textContent = 'Error';
+                document.getElementById('loading-desc').textContent = data.error;
+            }
+        }
+        
+        function addLiveJob(job, index) {
+            const container = document.getElementById('live-jobs-container');
+            const score = job.match_score;
+            let scoreClass = 'bg-slate-400';
+            if (score >= 80) scoreClass = 'bg-green-500';
+            else if (score >= 60) scoreClass = 'bg-yellow-500';
+            
+            const div = document.createElement('div');
+            div.className = 'job-appear flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm';
+            div.style.animationDelay = `${index * 0.1}s`;
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold ${scoreClass}">
+                        ${Math.round(score)}%
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-900">${job.title}</p>
+                        <p class="text-xs text-slate-500">${job.company}</p>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined text-green-500 text-xl">check_circle</span>
+            `;
+            
+            // Insert at the appropriate position based on score (higher scores at top)
+            const existing = container.querySelectorAll('.job-appear');
+            let inserted = false;
+            for (let i = 0; i < existing.length; i++) {
+                const existingScore = parseInt(existing[i].querySelector('.rounded-lg').textContent);
+                if (score > existingScore) {
+                    container.insertBefore(div, existing[i]);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) container.appendChild(div);
+            
+            // Keep only last 5 in live preview
+            while (container.children.length > 5) {
+                container.removeChild(container.firstChild);
+            }
+        }
+        
+        function showStreaming() {
+            document.getElementById('summary-card').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('jobs-list').classList.add('hidden');
+            document.getElementById('insights-section').classList.add('hidden');
+            document.getElementById('no-resume').classList.add('hidden');
+            document.getElementById('no-jobs').classList.add('hidden');
+            
+            // Reset streaming UI
+            document.getElementById('loading-title').textContent = 'Analyzing Jobs with AI...';
+            document.getElementById('loading-desc').textContent = 'Our AI is analyzing each job in real-time. Results will appear as they\'re computed.';
+            document.getElementById('stream-progress').classList.add('hidden');
+            document.getElementById('live-results').classList.add('hidden');
+            document.getElementById('live-jobs-container').innerHTML = '';
+        }
+
+        function showLoading() {
+            // Show the form, hide others
+            document.getElementById('summary-card').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('jobs-list').classList.add('hidden');
+            document.getElementById('insights-section').classList.add('hidden');
+            document.getElementById('no-resume').classList.add('hidden');
+            document.getElementById('no-jobs').classList.add('hidden');
+            // Hide streaming elements
+            document.getElementById('stream-progress').classList.add('hidden');
+            document.getElementById('live-results').classList.add('hidden');
+        }
+
+        function showNoResume() {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('summary-card').classList.add('hidden');
+            document.getElementById('jobs-list').classList.add('hidden');
+            document.getElementById('insights-section').classList.add('hidden');
+            document.getElementById('no-resume').classList.remove('hidden');
+            document.getElementById('no-jobs').classList.add('hidden');
+        }
+
+        function showNoJobs() {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('summary-card').classList.add('hidden');
+            document.getElementById('jobs-list').classList.add('hidden');
+            document.getElementById('insights-section').classList.add('hidden');
+            document.getElementById('no-resume').classList.add('hidden');
+            document.getElementById('no-jobs').classList.remove('hidden');
+        }
+
+        function renderJobs(jobs, summary) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('no-resume').classList.add('hidden');
+            document.getElementById('no-jobs').classList.add('hidden');
+            document.getElementById('summary-card').classList.remove('hidden');
+            document.getElementById('jobs-list').classList.remove('hidden');
+
+            // Update summary
+            document.getElementById('total-jobs').textContent = summary?.total || jobs.length;
+            document.getElementById('avg-match').textContent = (summary?.avg_match || '--') + '%';
+            document.getElementById('high-matches').textContent = summary?.high_matches || 0;
+
+            // Render jobs
+            const jobsList = document.getElementById('jobs-list');
+            
+            // Keep title, remove old cards
+            const title = jobsList.querySelector('h3');
+            jobsList.innerHTML = '';
+            jobsList.appendChild(title);
+
+            const container = document.createElement('div');
+            container.className = 'space-y-4';
+
+            jobs.forEach((job, index) => {
+                const rank = index + 1;
+                const card = document.createElement('article');
+                card.className = `job-rank-card fade-in ${rank === 1 ? 'rank-1' : ''}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                const score = job.match_score || 50;
+                let scoreClass = 'match-low';
+                if (score >= 80) scoreClass = 'match-high';
+                else if (score >= 60) scoreClass = 'match-medium';
+
+                // Strengths pills
+                let strengthsHtml = '';
+                if (job.strengths && job.strengths.length > 0) {
+                    strengthsHtml = job.strengths.slice(0, 4).map(s => 
+                        `<span class="strength-pill">${s}</span>`
+                    ).join('');
+                }
+
+                // Missing skills pills
+                let missingHtml = '';
+                if (job.missing_skills && job.missing_skills.length > 0) {
+                    missingHtml = `
+                        <div class="mt-3 pt-3 border-t border-slate-100">
+                            <p class="text-xs font-medium text-amber-600 mb-2">Skills to learn:</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${job.missing_skills.slice(0, 4).map(s => `<span class="missing-pill">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center ${rank === 1 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-600'} font-bold text-lg">
+                            ${rank}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h4 class="font-bold text-lg text-slate-900">${job.title || 'Job Title'}</h4>
+                                    <p class="text-sm text-slate-500 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-base">business</span>
+                                        ${job.company || 'Company'}
+                                        <span class="text-slate-300">•</span>
+                                        <span class="material-symbols-outlined text-base">location_on</span>
+                                        ${job.location || 'Location'}
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="deleteJobInsight(${job.id})" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Job">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                    <div class="match-badge ${scoreClass}">
+                                        ${score}%
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-2 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-base text-indigo-500">check_circle</span>
+                                ${job.match_reason || 'Analyzing...'}
+                            </p>
+                            
+                            ${strengthsHtml ? `
+                                <div class="mt-3">
+                                    <p class="text-xs font-medium text-green-600 mb-2">Your strengths:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${strengthsHtml}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${missingHtml}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+jobsList.appendChild(container);
+        }
+        
+        async function deleteJobInsight(jobId) {
+            if (!confirm('Are you sure you want to delete this job?')) return;
+            
+            try {
+                const res = await fetch(`/api/search/jobs/${jobId}`, { 
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    // Reload the analysis
+                    loadData();
+                }
+            } catch (err) {
+                console.error('Failed to delete job:', err);
+            }
+        }
+        
+        function renderInsights(insights) {
+            if (!insights || Object.keys(insights).length === 0) return;
+            
+            document.getElementById('insights-section').classList.remove('hidden');
+
+            // Your strengths
+            const strengthsEl = document.getElementById('insight-strengths');
+            if (insights.top_matching_skills) {
+                strengthsEl.innerHTML = insights.top_matching_skills.slice(0, 5).map(s => 
+                    `<span class="skill-pill">${s}</span>`
+                ).join('');
+            } else {
+                strengthsEl.innerHTML = '<p class="text-sm text-slate-500">No data</p>';
+            }
+
+            // Skills to learn
+            const missingEl = document.getElementById('insight-missing');
+            if (insights.skills_to_learn) {
+                missingEl.innerHTML = insights.skills_to_learn.slice(0, 5).map(s => 
+                    `<span class="missing-pill">${s}</span>`
+                ).join('');
+            } else {
+                missingEl.innerHTML = '<p class="text-sm text-slate-500">No data</p>';
+            }
+
+            // Market trends
+            const trendsEl = document.getElementById('insight-trends');
+            trendsEl.textContent = insights.market_trends || 'Analyzing market...';
+        }
+    </script>
+</body>
+</html>
