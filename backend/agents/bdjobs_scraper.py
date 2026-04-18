@@ -282,28 +282,36 @@ async def run(
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context(
                 viewport={"width": 1280, "height": 900},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             )
 
-            # Search page - skip ad blocking for simplicity/ stability
+            # Search page - block ads for stability
             search_page = await context.new_page()
+            await search_page.route(
+                "**/*",
+                lambda r: (
+                    r.abort()
+                    if any(d in r.request.url for d in BLOCKED_RESOURCES)
+                    else r.continue_()
+                ),
+            )
 
             print(f"  🔍 [BDJobs] Navigating to search...")
             await search_page.goto(
-                "https://bdjobs.com/h/", wait_until="domcontentloaded", timeout=60000
+                "https://bdjobs.com/h/", wait_until="domcontentloaded", timeout=40000
             )
 
             # Wait for and fill search
-            await search_page.wait_for_selector("input[type='text']", timeout=15000)
+            await search_page.wait_for_selector("input[type='text']", timeout=10000)
             await search_page.fill("input[type='text']", query)
             await search_page.press("input[type='text']", "Enter")
 
-            # Wait for URL to change to job results page
-            await search_page.wait_for_url("**/h/jobs**", timeout=15000)
-            print(f"  ✅ [BDJobs] URL changed to /h/jobs")
-
             print(f"  ⏳ [BDJobs] Waiting for results...")
-            await asyncio.sleep(15)
+            await asyncio.sleep(5)
+
+            # Debug: show current URL
+            current_url = search_page.url
+            print(f"  🌐 [BDJobs] Current URL: {current_url}")
 
             # Debug: count all links on page
             all_link_count = await search_page.locator("a").count()
