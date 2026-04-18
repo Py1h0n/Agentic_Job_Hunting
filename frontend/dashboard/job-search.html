@@ -537,11 +537,34 @@
             }
         }
         
-        // Wait for DOM to be ready before loading
+        // Wait for DOM to be ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadLastSession);
+            document.addEventListener('DOMContentLoaded', init);
         } else {
-            loadLastSession();
+            init();
+        }
+        
+        function init() {
+            // Show empty state by default - don't load last session automatically
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('results-grid').classList.add('hidden');
+            
+            // Load recent searches for the dropdown (optional - shows what user can click)
+            loadRecentSearches();
+        }
+        
+        // Load recent searches for display (when user clicks the dropdown)
+        async function loadRecentSearches() {
+            try {
+                const historyRes = await fetch('/api/search/history?limit=10', { credentials: 'include' });
+                if (historyRes.ok) {
+                    const historyData = await historyRes.json();
+                    updateRecentSearchChips(historyData.data || []);
+                }
+            } catch (e) {
+                console.error('Failed to load recent searches:', e);
+            }
         }
         
         // History Store (Vanilla JS pattern)
@@ -1344,12 +1367,14 @@
         }
         renderAgentPills(initialAgents);
 
-        // Helper to update chips
+        // Helper to update chips - handles both array and object with data property
         function updateRecentSearchChips(data) {
             const container = document.getElementById('recent-searches-list');
-            if (!data.data || data.data.length === 0) return;
+            // Handle both cases: data could be an array or { data: [...] }
+            let items = Array.isArray(data) ? data : (data.data || []);
+            if (items.length === 0) return;
             
-            container.innerHTML = data.data.slice(0, 6).map(h => `
+            container.innerHTML = items.slice(0, 6).map(h => `
                 <button onclick="loadHistoryDetail('${h.session_id}')" class="filter-chip">
                     ${h.query}
                 </button>
@@ -1585,6 +1610,10 @@
                 
                 document.getElementById('search-input').value = searchData.query || '';
                 if (searchData.mode) setMode(searchData.mode);
+                
+                // Store session ID for future reference
+                currentSessionId = sessionId;
+                localStorage.setItem('lastSessionId', sessionId);
                 
                 // Update Grid
                 allJobs = jobs;
