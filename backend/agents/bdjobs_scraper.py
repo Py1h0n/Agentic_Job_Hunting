@@ -211,7 +211,7 @@ async def capture_job(context, url: str, browser_sem: asyncio.Semaphore) -> dict
 
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            await asyncio.sleep(3)  # Increased for cloud
+            await asyncio.sleep(1)  # Reduced from 2s for speed
 
             # Default title until AI extracts it
             title = "Unknown Role"
@@ -292,7 +292,6 @@ async def run(
             await search_page.goto(
                 "https://bdjobs.com/h/", wait_until="domcontentloaded", timeout=60000
             )
-            await asyncio.sleep(3)  # Wait for page to fully load
 
             # Wait for and fill search
             await search_page.wait_for_selector("input[type='text']", timeout=15000)
@@ -300,7 +299,7 @@ async def run(
             await search_page.press("input[type='text']", "Enter")
 
             print(f"  ⏳ [BDJobs] Waiting for results...")
-            await asyncio.sleep(12)  # Increased for cloud
+            await asyncio.sleep(5)
 
             # Try to filter for "Most Recent" - look for sort/filter dropdown
             try:
@@ -311,7 +310,7 @@ async def run(
                 if await recent_btn.is_visible(timeout=3000):
                     await recent_btn.click()
                     print(f"  📅 [BDJobs] Filtered: Most Recent")
-                    await asyncio.sleep(4)
+                    await asyncio.sleep(2)
             except Exception:
                 pass  # Filter not found, continue anyway
 
