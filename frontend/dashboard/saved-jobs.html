@@ -179,7 +179,7 @@
                 allJobs = data.data || [];
                 
                 document.getElementById('loading-state').classList.add('hidden');
-                document.getElementById('saved-count').textContent = allJobs.length;
+                document.getElementById('saved-count').textContent = data.total || 0;
 
                 if (allJobs.length === 0) {
                     document.getElementById('empty-state').classList.remove('hidden');
