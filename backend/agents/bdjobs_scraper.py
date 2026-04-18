@@ -298,6 +298,10 @@ async def run(
             await search_page.fill("input[type='text']", query)
             await search_page.press("input[type='text']", "Enter")
 
+            # Wait for URL to change to job results page
+            await search_page.wait_for_url("**/h/jobs**", timeout=15000)
+            print(f"  ✅ [BDJobs] URL changed to /h/jobs")
+
             print(f"  ⏳ [BDJobs] Waiting for results...")
             await asyncio.sleep(15)
 
@@ -309,8 +313,15 @@ async def run(
             title = await search_page.title()
             print(f"  📄 [BDJobs] Page title: {title}")
 
-            # Wait more for jobs to render
-            await asyncio.sleep(5)
+            # Sample some link URLs to find pattern
+            all_links_debug = await search_page.locator("a[href]").all()
+            print(f"  🔗 [BDJobs] Sample first 5 links:")
+            for i in range(min(5, len(all_links_debug))):
+                try:
+                    href = await all_links_debug[i].get_attribute("href")
+                    print(f"    {i + 1}. {href[:100] if href else 'None'}")
+                except:
+                    pass
 
             # Try to filter for "Most Recent" - look for sort/filter dropdown
             try:
@@ -328,6 +339,9 @@ async def run(
             # Extract job links
             job_links = set()
             links = await search_page.locator("a[href*='/h/details/']").all()
+            link_count = len(links)
+            print(f"  🔗 [Selector /h/details/] Found: {link_count} links")
+
             for a in links:
                 href = await a.get_attribute("href")
                 if href:
