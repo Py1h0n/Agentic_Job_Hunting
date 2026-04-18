@@ -299,7 +299,7 @@ async def run(
             await search_page.press("input[type='text']", "Enter")
 
             print(f"  ⏳ [BDJobs] Waiting for results...")
-            await asyncio.sleep(5)
+            await asyncio.sleep(8)
 
             # Try to filter for "Most Recent" - look for sort/filter dropdown
             try:
