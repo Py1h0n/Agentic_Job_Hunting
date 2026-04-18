@@ -942,6 +942,7 @@ def analyze_jobs_stream(
                     "skills": job.get("skills", ""),
                     "experience": job.get("experience", ""),
                     "location": job.get("location", ""),
+                    "url": job.get("url", ""),
                 }
             )
 
@@ -1037,6 +1038,7 @@ Return ONLY JSON with keys: score (0-100), match_reason (string), missing_skills
                 "title": job["title"],
                 "company": job["company"],
                 "location": job["location"],
+                "url": job.get("url", ""),
                 "skills": job["skills"],
                 "experience": job["experience"],
                 "match_score": analysis["score"],
@@ -1060,7 +1062,7 @@ Return ONLY JSON with keys: score (0-100), match_reason (string), missing_skills
         summary = {
             "total": len(analyzed),
             "avg_match": avg_score,
-            "high_matches": len([s for s in scores if s >= 80]),
+            "high_matches": len([s for s in scores if s >= 70]),
             "medium_matches": len([s for s in scores if 60 <= s < 80]),
             "low_matches": len([s for s in scores if s < 60]),
         }
@@ -1250,7 +1252,7 @@ Provide specific missing skills and strengths for each job."""
             "summary": {
                 "total": len(ranked_jobs),
                 "avg_match": int(sum(scores) / len(scores)) if scores else 0,
-                "high_matches": len([s for s in scores if s >= 80]),
+                "high_matches": len([s for s in scores if s >= 70]),
                 "medium_matches": len([s for s in scores if 60 <= s < 80]),
                 "low_matches": len([s for s in scores if s < 60]),
             },
@@ -1302,7 +1304,7 @@ Provide specific missing skills and strengths for each job."""
             "summary": {
                 "total": len(ranked_jobs),
                 "avg_match": int(sum(scores) / len(scores)) if scores else 0,
-                "high_matches": len([s for s in scores if s >= 80]),
+                "high_matches": len([s for s in scores if s >= 70]),
                 "medium_matches": len([s for s in scores if 60 <= s < 80]),
                 "low_matches": len([s for s in scores if s < 60]),
             },
