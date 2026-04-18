@@ -284,10 +284,17 @@ def resume_status(user=Depends(current_user)):
     if not row:
         return {"status": "not_uploaded"}
 
-    if row["skills"] and row["summary"]:
+    # Check if resume is actually uploaded (has skills OR summary, not empty)
+    skills = row["skills"] if row["skills"] else ""
+    summary = row["summary"] if row["summary"] else ""
+
+    if skills and summary and len(skills) > 0 and len(summary) > 0:
         return {"status": "ready"}
 
-    return {"status": "processing"}
+    if skills or summary:
+        return {"status": "processing"}
+
+    return {"status": "not_uploaded"}
 
 
 @router.get("")
