@@ -661,6 +661,75 @@ def get_top_matching_jobs(
     return {"jobs": top_jobs, "summary": summary}
 
 
+def _generate_action_plans(
+    resume_skills: list, top_skills: list, missing_skills: list
+) -> dict:
+    """Generate AI-powered personalized action plans for missing skills"""
+    if not missing_skills:
+        return {}
+
+    # Build prompt for action plans
+    resume_str = ", ".join(resume_skills) if resume_skills else "None listed"
+    market_str = ", ".join(top_skills[:8]) if top_skills else "General tech skills"
+    missing_str = ", ".join(missing_skills)
+
+    prompt = f"""You are a career coach. Given this resume and market demand:
+
+Resume skills: {resume_str}
+Market demand skills: {market_str}
+Missing skills: {missing_str}
+
+For each MISSING skill, provide a SHORT one-sentence action plan (max 15 words) for how to learn or pivot around this skill.
+
+Return ONLY a JSON object like:
+{{
+  "python": "Take a Python bootcamp or complete Python.org tutorial within 2 weeks",
+  "react": "Build a small React project to demonstrate frontend skills quickly",
+  "aws": "Study AWS Free Tier and earn Cloud Practitioner certification"
+}}
+
+Be specific and actionable. Focus on FAST learning strategies."""
+
+    try:
+        from openai import OpenAI
+        import os
+
+        client = OpenAI(
+            base_url="https://api.tokenfactory.nebius.com/v1/",
+            api_key=os.environ.get("NEBIUS_API_KEY", ""),
+        )
+
+        response = client.chat.completions.create(
+            model="Qwen/Qwen3-235B-A22B-Instruct-2507",
+            messages=[
+                {"role": "system", "content": "You are a helpful career coach."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=300,
+            temperature=0.3,
+        )
+
+        content = response.choices[0].message.content.strip()
+
+        # Extract JSON from response
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0].strip()
+
+        return json.loads(content)
+    except Exception as e:
+        print(f"[action_plans] AI generation failed: {e}")
+        # Fallback basic action plans
+        return {
+            "python": "Start with Python basics - complete online tutorial in 2 weeks",
+            "javascript": "Learn JS fundamentals - freeCodeCamp is a good starting point",
+            "react": "Build a portfolio project to learn React basics",
+            "aws": "Use AWS Free Tier for hands-on cloud experience",
+            "sql": "Practice SQL with LeetCode or W3Schools exercises",
+        }
+
+
 @router.get("/insights")
 def get_insights(search_id: int | None = None, user=Depends(current_user)):
     from database import get_column
@@ -750,15 +819,35 @@ def get_insights(search_id: int | None = None, user=Depends(current_user)):
     if missing:
         insights.append(f"You're missing: {', '.join(missing[:3])}")
 
+    # Calculate avg_match percentage
+    total_job_skills = len(top_skills) if top_skills else 1
+    matched_count = len(
+        [s for s in top_skills if s.lower() in [rs.lower() for rs in resume_skills]]
+    )
+    avg_match = (
+        round((matched_count / total_job_skills) * 100) if total_job_skills > 0 else 0
+    )
+
     skill_gaps = []
+    # Generate action plans for skill gaps using AI prompt
+    action_plans = (
+        _generate_action_plans(resume_skills, top_skills, missing[:3])
+        if missing
+        else {}
+    )
+
     for s in top_skills[:8]:
         is_in_resume = s.lower() in [rs.lower() for rs in resume_skills]
+        # Get personalized action plan for missing skills
+        plan = action_plans.get(s.lower(), "") if not is_in_resume else ""
+
         skill_gaps.append(
             {
                 "skill": s,
                 "required": s,
                 "have": s if is_in_resume else "",
                 "status": "matched" if is_in_resume else "missing",
+                "action_plan": plan,
             }
         )
 
@@ -766,7 +855,7 @@ def get_insights(search_id: int | None = None, user=Depends(current_user)):
         "insights": insights,
         "summary": {
             "best_role": "Based on your skills",
-            "avg_match": "--",
+            "avg_match": f"{avg_match}%",
             "top_missing": missing[:5],
             "jobs_found": len(saved_rows),
         },
