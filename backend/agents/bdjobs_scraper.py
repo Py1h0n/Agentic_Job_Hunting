@@ -301,6 +301,14 @@ async def run(
             print(f"  ⏳ [BDJobs] Waiting for results...")
             await asyncio.sleep(8)
 
+            # Debug: count all links on page
+            all_link_count = await search_page.locator("a").count()
+            print(f"  🔗 [BDJobs] Total links on page: {all_link_count}")
+
+            # Get page title for debug
+            title = await search_page.title()
+            print(f"  📄 [BDJobs] Page title: {title}")
+
             # Try to filter for "Most Recent" - look for sort/filter dropdown
             try:
                 # Look for sort dropdown or "Most Recent" option
