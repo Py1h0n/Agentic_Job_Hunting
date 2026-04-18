@@ -76,6 +76,11 @@
             background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
             box-shadow: 0 4px 20px -5px rgba(251, 191, 36, 0.3);
         }
+        .job-rank-card.rank-2 {
+            border-color: #FFD700;
+            border-width: 2px;
+            box-shadow: 0 4px 15px -5px rgba(255, 215, 0, 0.25);
+        }
         
         .match-badge {
             font-weight: 700;
@@ -623,13 +628,25 @@
 
             jobs.forEach((job, index) => {
                 const rank = index + 1;
+                
+                const score = job.match_score || 0;
+                const isStrongMatch = score >= 70; // AI-determined: strong match = 70%+
+                
                 const card = document.createElement('article');
-                card.className = `job-rank-card fade-in ${rank === 1 ? 'rank-1' : ''}`;
+                // Only apply gold border to AI-determined strong matches (score >= 70)
+                card.className = `job-rank-card fade-in ${isStrongMatch ? 'rank-2' : ''}`;
                 card.style.animationDelay = `${index * 0.1}s`;
+                
+                // Build source link - open in new tab (check for valid URL, not empty or #)
+                let jobUrl = job.url || job.link || job.source_url || job.original_url || job.apply_url || '';
+                // Validate: must be a real URL starting with http and not be current page
+                if (!jobUrl || jobUrl === '#' || !jobUrl.startsWith('http')) {
+                    jobUrl = '';
+                }
+                const openNewTab = jobUrl ? 'target="_blank" rel="noopener noreferrer"' : '';
 
-                const score = job.match_score || 50;
                 let scoreClass = 'match-low';
-                if (score >= 80) scoreClass = 'match-high';
+                if (score >= 70) scoreClass = 'match-high';
                 else if (score >= 60) scoreClass = 'match-medium';
 
                 // Strengths pills
@@ -661,7 +678,11 @@
                         <div class="flex-1">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <h4 class="font-bold text-lg text-slate-900">${job.title || 'Job Title'}</h4>
+                                    ${jobUrl ? `
+                                    <a href="${jobUrl}" ${openNewTab} class="font-bold text-lg text-slate-900 hover:text-indigo-600 hover:underline">${job.title || 'Job Title'}</a>
+                                    ` : `
+                                    <span class="font-bold text-lg text-slate-900">${job.title || 'Job Title'}</span>
+                                    `}
                                     <p class="text-sm text-slate-500 flex items-center gap-1">
                                         <span class="material-symbols-outlined text-base">business</span>
                                         ${job.company || 'Company'}
@@ -671,6 +692,17 @@
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    ${jobUrl ? `
+                                    <a href="${jobUrl}" ${openNewTab} class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg flex items-center gap-1 transition-all">
+                                        <span class="material-symbols-outlined text-base">open_in_new</span>
+                                        Go to Job
+                                    </a>
+                                    ` : `
+                                    <span class="px-3 py-1.5 bg-slate-200 text-slate-500 text-sm font-medium rounded-lg flex items-center gap-1" title="No URL available">
+                                        <span class="material-symbols-outlined text-base">link_off</span>
+                                        No Link
+                                    </span>
+                                    `}
                                     <button onclick="deleteJobInsight(${job.id})" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Job">
                                         <span class="material-symbols-outlined">delete</span>
                                     </button>
