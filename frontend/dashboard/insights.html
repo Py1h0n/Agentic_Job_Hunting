@@ -538,11 +538,11 @@
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-slate-900">${skill.skill}</span>
+                                <span class="font-bold text-slate-900">${skill.skill || skill.required}</span>
                                 <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Missing</span>
                             </div>
                             <p class="text-sm text-slate-600 leading-relaxed">
-                                ${generatePivotStrategy(skill.skill)}
+                                ${skill.action_plan || 'Focus on learning this skill to improve marketability'}
                             </p>
                         </div>
                     </div>
