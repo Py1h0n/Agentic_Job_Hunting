@@ -30,12 +30,11 @@
       <a href="/dashboard/resume.html" class="nav-item" data-page="resume">
         <span class="material-symbols-outlined">description</span>
         <span class="nav-text">Resume</span>
-        <span class="badge" id="resume-badge">Not uploaded</span>
       </a>
       <a href="/dashboard/best-matches.html" class="nav-item" data-page="matches">
         <span class="material-symbols-outlined">workspace_premium</span>
         <span class="nav-text">Best Matches</span>
-        <span class="badge-count" id="matches-count">0</span>
+        <!-- Badge removed for Best Matches - shows saved jobs count which is confusing -->
       </a>
       <a href="/dashboard/insights.html" class="nav-item" data-page="insights">
         <span class="material-symbols-outlined">psychology</span>
@@ -206,35 +205,5 @@ function toggleSidebar() {
       item.classList.add('active');
     }
   });
-
-  fetch('/api/resume/status', { credentials: 'include' })
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(data => {
-      const badge = document.getElementById('resume-badge');
-      if (badge && data.status) {
-        if (data.status === 'ready') {
-          badge.textContent = 'Ready';
-          badge.style.background = '#dcfce7';
-          badge.style.color = '#166534';
-        } else if (data.status === 'processing') {
-          badge.textContent = 'Processing';
-          badge.style.background = '#fef3c7';
-          badge.style.color = '#92400e';
-        } else {
-          badge.textContent = 'Not uploaded';
-        }
-      }
-    })
-    .catch(() => {});
-
-  fetch('/api/search/saved?limit=1', { credentials: 'include' })
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(data => {
-      const countEl = document.getElementById('matches-count');
-      if (countEl && data.total !== undefined) {
-        countEl.textContent = data.total;
-      }
-    })
-    .catch(() => {});
 })();
 </script>
