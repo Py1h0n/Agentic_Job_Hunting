@@ -299,7 +299,16 @@ async def run(
             await search_page.press("input[type='text']", "Enter")
 
             print(f"  ⏳ [BDJobs] Waiting for results...")
-            await asyncio.sleep(5)
+            await asyncio.sleep(8)  # Increased wait
+
+            # Wait for job listings to actually appear
+            try:
+                await search_page.wait_for_selector(
+                    "a[href], .job-card, .job-item", timeout=10000
+                )
+                print(f"  ✅ [BDJobs] Job listings loaded")
+            except:
+                print(f"  ⚠️ [BDJobs] No job listing elements found")
 
             # Try to filter for "Most Recent" - look for sort/filter dropdown
             try:
@@ -314,18 +323,48 @@ async def run(
             except Exception:
                 pass  # Filter not found, continue anyway
 
-            # Extract job links
+            # Extract job links - try multiple selectors
             job_links = set()
-            links = await search_page.locator("a[href*='/h/details/']").all()
-            for a in links:
-                href = await a.get_attribute("href")
-                if href:
-                    url = (
-                        "https://bdjobs.com" + href
-                        if not href.startswith("http")
-                        else href
-                    )
-                    job_links.add(url.split("?")[0])
+
+            # Try different selectors
+            selectors = [
+                "a[href*='/h/details/']",
+                "a[href*='/jobs/']",
+                "a.job-title-link",
+                "h2 a",  # Sometimes job titles are in h2
+                ".job-list-item a[href*='bdjobs.com']",
+                "a[href*='details']",
+            ]
+
+            for sel in selectors:
+                try:
+                    links = await search_page.locator(sel).all()
+                    print(f"  🔗 [Selector '{sel}'] Found {len(links)} links")
+                    for a in links:
+                        href = await a.get_attribute("href")
+                        if href and "bdjobs" in href.lower():
+                            url = href.split("?")[0]
+                            if "/details/" in url or "/jobs/" in url:
+                                job_links.add(url)
+                except:
+                    pass
+
+            # If still empty, try getting all links and filter
+            if not job_links:
+                all_links = await search_page.locator("a[href]").all()
+                for a in all_links:
+                    try:
+                        href = await a.get_attribute("href")
+                        if (
+                            href
+                            and "bdjobs" in href
+                            and ("details" in href or "jobs" in href)
+                        ):
+                            job_links.add(href.split("?")[0])
+                    except:
+                        pass
+
+            print(f"  🔗 [Total] Unique job URLs: {len(job_links)}")
 
             links_list = list(job_links)[:max_jobs]
             stats["total_found"] = len(links_list)
