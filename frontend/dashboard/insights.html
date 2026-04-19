@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Executive Command Center | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --secondary: #2563eb;
+            --tertiary: #14b8a6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .insight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #06b6d4);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .ai-pulse {
+            animation: pulse-soft 2s infinite;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .cluster-bar {
+            transition: all 0.3s ease;
+        }
+        .cluster-bar:hover {
+            transform: scaleX(1.02);
+            transform-origin: left;
+        }
+        
+        .pivot-card {
+            transition: all 0.3s ease;
+        }
+        .pivot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-indigo-600 px-3 py-1 bg-indigo-100 rounded-full">Executive Command Center</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="header-avatar">
+                    <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm animate-pulse">...</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="font-manrope font-extrabold text-3xl text-slate-900">Career Command Center</h2>
+                        <p class="text-slate-500 mt-1">Real-time intelligence: Your skills vs. market demand</p>
+                    </div>
+                    <button id="analyze-btn" onclick="window.analyzeWithAI()" class="p-2.5 bg-indigo-600 text-white border border-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span>Analyze with AI</span>
+                    </button>
+                    <button id="refresh-btn" onclick="window.location.reload()" class="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                        <span class="material-symbols-outlined text-slate-600">refresh</span>
+                    </button>
+                </div>
+
+                <!-- Executive Metrics TIER -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="metric-card bg-gradient-to-br from-indigo-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-indigo-600">bookmark</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Saved</span>
+                        </div>
+                        <p id="total-saved" class="text-4xl font-black text-slate-900 metric-value">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Jobs in your pipeline</p>
+                    </div>
+                    <div class="metric-card bg-gradient-to-br from-green-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-green-600">trending_up</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Avg Match</span>
+                        </div>
+                        <p id="avg-match" class="text-4xl font-black text-green-600 metric-value">--%</p>
+                    </div>
+                    <div class="metric-card bg-gradient-to-br from-amber-50 to-white">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-amber-500">local_fire_department</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Top Demand</span>
+                        </div>
+                        <p id="top-demand" class="text-3xl font-black text-slate-900 metric-value">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Most requested skill</p>
+                    </div>
+                </div>
+
+                <!-- AI Career Insights Card -->
+                <div id="career-insights-card" class="hidden bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-8">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        AI Career Analysis
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-xs text-indigo-200 uppercase mb-1">Recommended Role</p>
+                            <p id="ai-recommended-role" class="text-xl font-bold text-white">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-indigo-200 uppercase mb-1">Salary Insight</p>
+                            <p id="ai-salary" class="font-medium">--</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-xs text-indigo-200 uppercase mb-1">Your Strengths</p>
+                            <p id="ai-strengths" class="text-sm">--</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-xs text-indigo-200 uppercase mb-1">Next Steps</p>
+                            <ul id="ai-next-steps" class="text-sm list-disc list-inside space-y-1"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMMAND CENTER: 3-Column Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Feature #1: Skill Radar Chart -->
+                    <div class="insight-card">
+                        <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">radar</span>
+                            Skill Alignment Radar
+                        </h3>
+                        <div class="chart-container relative" style="height: 320px;">
+                            <canvas id="radarChart"></canvas>
+                            <div id="radar-loading" class="absolute inset-0 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-slate-200 animate-spin">sync</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-3 text-center">Market Demand (dashed) vs. Your Skills (filled)</p>
+                    </div>
+
+                <!-- Feature #2: Career Sprint Dashboard -->
+                <div class="insight-card">
+                    <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">dashboard</span>
+                        Career Sprint
+                    </h3>
+                    <!-- Source Toggle -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="text-sm text-slate-600">Analyze jobs from:</div>
+                        <div class="flex gap-2">
+                            <button id="saved-btn" onclick="setSource('saved')"
+                                class="px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors">
+                                Saved Jobs
+                            </button>
+                            <button id="all-btn" onclick="setSource('all')"
+                                class="px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                                All Searched
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 4-card grid -->
+                    <div id="career-strategy" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Cards injected by JS -->
+                    </div>
+                </div>
+                </div>
+
+                <!-- Feature #3: Bridge the Gap Action Plan -->
+                <div class="insight-card bg-gradient-to-br from-amber-50/50 to-white border-amber-200">
+                    <h3 class="font-bold text-xl text-slate-900 mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500">construction</span>
+                        Bridge the Gap: Action Plan
+                    </h3>
+                    <div id="bridge-gap" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Pivot strategy cards injected here -->
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-24 bg-slate-100 rounded-xl"></div>
+                            <div class="h-24 bg-slate-100 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature #4: Market Pulse Heatmap -->
+                <div class="insight-card">
+                    <h3 class="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">grid_on</span>
+                        Market Pulse Heatmap
+                    </h3>
+                    
+                    <!-- Toggle Controls -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="flex gap-2">
+                            <button id="skills-toggle" onclick="setHeatmapView('skills')"
+                                class="px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors">
+                                Skills
+                            </button>
+                            <button id="titles-toggle" onclick="setHeatmapView('titles')"
+                                class="px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                                Job Titles
+                            </button>
+                        </div>
+                        <div class="text-xs text-slate-500">
+                            Last updated: <span id="pulse-last-updated">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Heatmap Container -->
+                    <div id="heatmap-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2" style="min-height: 200px;">
+                        <div class="col-span-full flex items-center justify-center py-8">
+                            <span class="material-symbols-outlined text-3xl text-indigo-300 animate-pulse">psychology</span>
+                            <span class="ml-2 text-sm text-slate-400">Loading market pulse...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let radarChart = null;
+        let currentStrategySource = 'saved'; // 'saved' | 'all'
+        let hasAnalyzed = false;
+
+        function generatePivotStrategy(skillName) {
+            const skill = skillName.toLowerCase();
+            
+            const strategies = {
+                'aws': "Emphasize your cloud architecture fundamentals. In interviews, draw parallels from your existing infrastructure experience and demonstrate rapid learning ability.",
+                'azure': "Frame your tech background as cloud-agnostic. Highlight your ability to adapt to any cloud platform.",
+                'gcp': "Position yourself as platform-agnostic. Emphasize that cloud concepts transfer across providers.",
+                'docker': "You likely have containerization experience. Discuss how Docker relates to deployment and DevOps workflows you've used.",
+                'kubernetes': "Pivot: 'I have strong Docker experience and understand container orchestration fundamentals. I'm actively upskilling in K8s.'",
+                'agile': "Frame your project management as Agile-adjacent. Discuss sprints, standups, and iterative delivery you've experienced.",
+                'scrum': "Highlight any team collaboration experience. Emphasize your ability to work in fast-paced, iterative environments.",
+                'react': "You have frontend foundations. Emphasize component-based thinking and state management concepts you know.",
+                'node': "Pivot: 'I'm a quick learner and have experience with JavaScript/JS frameworks. Node.js is my next upskill priority.'",
+                'python': "Strong analytical foundations. Discuss how you've used Python for scripting, automation, or data work.",
+                'sql': "Emphasize any data work. Database skills transfer across languages - highlight your query logic experience.",
+                'typescript': "You already know JavaScript - TypeScript is a natural evolution. Discuss your JS fundamentals confidently.",
+                'graphql': "Show eagerness to learn. Position API design experience as transferable to GraphQL concepts.",
+                'machine learning': "Any analytical or data project counts! Discuss how you've derived insights from data, even without formal ML.",
+                'ai': "Your tech background shows you can work with emerging tech. Express enthusiasm and rapid upskilling plans.",
+                'data': "Any analytics or Excel work counts! Highlight your data-driven decision making experience.",
+                'lead': "Frame any team lead or mentor experience. Technical leadership is still leadership."
+            };
+            
+            for (const [key, strategy] of Object.entries(strategies)) {
+                if (skill.includes(key)) {
+                    return strategy;
+                }
+            }
+            
+            return "Acknowledge this gap confidently in interviews. Express high willingness to upskill and mention a similar technology you learned rapidly in the past.";
+        }
+
+        // ── Career Sprint Dashboard ──────────────────────────────────────────
+        function updateToggleButtons() {
+            const savedBtn = document.getElementById('saved-btn');
+            const allBtn = document.getElementById('all-btn');
+            if (currentStrategySource === 'saved') {
+                savedBtn.className = 'px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors';
+                allBtn.className = 'px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors';
+            } else {
+                savedBtn.className = 'px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors';
+                allBtn.className = 'px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors';
+            }
+        }
+
+        function setSource(src) {
+            if (currentStrategySource === src) return;
+            currentStrategySource = src;
+            updateToggleButtons();
+            // Re-run analysis with new source
+            hasAnalyzed = false;
+            const btn = document.getElementById('analyze-btn');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined">psychology</span><span>Analyze with AI</span>';
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            }
+            performAnalysis();
+        }
+
+        async function performAnalysis() {
+            if (hasAnalyzed) return;
+            hasAnalyzed = true;
+            const btn = document.getElementById('analyze-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span><span class="animate-pulse">Analyzing...</span>';
+                btn.classList.remove('bg-indigo-600');
+                btn.classList.add('bg-indigo-500');
+            }
+
+            const radarLoading = document.getElementById('radar-loading');
+            if (radarLoading) {
+                radarLoading.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="relative">
+                            <span class="material-symbols-outlined text-5xl text-indigo-400 animate-pulse">psychology</span>
+                            <div class="absolute -bottom-2 -right-2 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
+                        </div>
+                        <p class="text-indigo-600 font-medium animate-pulse">Analyzing your profile...</p>
+                    </div>
+                `;
+            }
+
+            // Show empty/loading for career strategy too
+            document.getElementById('career-strategy').innerHTML = `
+                <div class="col-span-2 flex items-center justify-center py-8">
+                    <span class="material-symbols-outlined text-3xl text-indigo-500 animate-spin sync">sync</span>
+                    <span class="ml-2 text-sm text-slate-500">Loading strategy...</span>
+                </div>
+            `;
+
+            try {
+                const savedParam = currentStrategySource === 'saved' ? 'true' : 'false';
+                const [resumeRes, jobsRes] = await Promise.all([
+                    fetch(`/api/resume/insights?saved=${savedParam}`, { credentials: 'include' }),
+                    fetch(`/api/resume/analyze-jobs?limit=50&saved=${savedParam}`, { credentials: 'include' })
+                ]);
+
+                const resumeData = resumeRes.ok ? await resumeRes.json() : {};
+                const jobsData = jobsRes.ok ? await jobsRes.json() : {};
+
+                console.log('[Insights] Data:', { resumeData, jobsData });
+
+                // Check for no resume or no jobs
+                if (!resumeData.summary || (resumeData.summary.jobs_found || 0) === 0) {
+                    showNoData();
+                    return;
+                }
+
+                renderCommandCenter(resumeData, jobsData);
+
+                if (btn) {
+                    btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span><span>AI Analyzed</span>';
+                    btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    btn.classList.add('bg-green-600');
+                    btn.disabled = true;
+                }
+
+            } catch (err) {
+                console.error('[AI Analysis] Error:', err);
+                showNoData();
+            }
+        }
+
+        // Expose globally for button onclick
+        window.analyzeWithAI = performAnalysis;
+
+        function renderCareerStrategy(strat) {
+            const container = document.getElementById('career-strategy');
+            if (!strat || Object.keys(strat).length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">info</span>
+                        <p class="text-sm text-slate-500">Click "Analyze with AI" to generate your career strategy.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const { priority_jobs, learning_sprint, market_hotspots, competitive_edge } = strat;
+
+            const skillBarWidth = (unlocked, total) => Math.min(100, Math.round((unlocked / (total || 1)) * 100));
+
+            container.innerHTML = `
+                <!-- Card 1: Priority Jobs -->
+                <div class="p-4 bg-gradient-to-br from-indigo-50 to-white rounded-xl border border-indigo-100 fade-in-up">
+                    <h4 class="font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">target</span>
+                        Apply This Week
+                    </h4>
+                    <div class="space-y-3">
+                        ${priority_jobs.length ? priority_jobs.map(job => `
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <div class="flex items-start justify-between mb-1">
+                                    <span class="font-bold text-slate-900 text-sm truncate" title="${job.title}">${job.title}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-full ${job.match_score >= 80 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} ml-2">${job.match_score}%</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-2">${job.company} ${job.location ? '• ' + job.location : ''}</p>
+                                <p class="text-xs italic text-slate-600 mb-2">"${job.match_reason || 'Strong match'}"</p>
+                                <p class="text-xs font-medium text-indigo-700">${job.prep_tip}</p>
+                            </div>
+                        `).join('') : '<p class="text-sm text-slate-500">No top jobs yet. Complete an analysis.</p>'}
+                    </div>
+                </div>
+
+                <!-- Card 2: Learning Sprint -->
+                <div class="p-4 bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-100 fade-in-up" style="animation-delay: 0.1s">
+                    <h4 class="font-bold text-emerald-900 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-600">school</span>
+                        30-Day Learning Sprint
+                    </h4>
+                    <div class="space-y-3">
+                        ${learning_sprint.skills.length ? learning_sprint.skills.map(skill => `
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-sm">${skill.skill}</div>
+                                        <div class="text-xs text-slate-500">${skill.estimated_weeks} wks, ${skill.hours_per_week}h/wk</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs font-medium text-emerald-700">${skill.jobs_unlocked} jobs</div>
+                                        <div class="text-xs text-slate-400">unlocked</div>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${skillBarWidth(skill.jobs_unlocked, strat.summary.total_jobs_analyzed)}%;"></div>
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-sm text-slate-500">No skill gaps identified.</p>'}
+                    </div>
+                    ${learning_sprint.skills.length ? `
+                        <div class="mt-3 pt-2 border-t border-emerald-100 text-xs text-slate-500 flex justify-between">
+                            <span>Total: ${learning_sprint.total_weeks} weeks</span>
+                            <span>${learning_sprint.skills.length} skills</span>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Card 3: Market Hotspots -->
+                <div class="p-4 bg-gradient-to-br from-amber-50 to-white rounded-xl border border-amber-100 fade-in-up" style="animation-delay: 0.2s">
+                    <h4 class="font-bold text-amber-900 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-600">public</span>
+                        Market Hotspots
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <div class="text-slate-500 text-xs">Salary Range</div>
+                            <div class="font-bold text-slate-800">
+                                ${market_hotspots.salary_range.min > 0 ? '৳'+(market_hotspots.salary_range.min/1000).toFixed(0)+'k-৳'+(market_hotspots.salary_range.max/1000).toFixed(0)+'k' : 'N/A'}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 text-xs">Average</div>
+                            <div class="font-bold text-slate-800">
+                                ${market_hotspots.salary_range.avg > 0 ? '৳'+market_hotspots.salary_range.avg.toLocaleString() : 'N/A'}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 text-xs">Top Location</div>
+                            <div class="font-bold text-slate-800">
+                                ${market_hotspots.top_locations[0]?.location || 'N/A'}
+                                ${market_hotspots.top_locations[0] ? '('+market_hotspots.top_locations[0].pct+'%)' : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 text-xs">Job Type</div>
+                            <div class="font-bold text-slate-800">
+                                ${market_hotspots.job_type_mix[0]?.type || 'N/A'}
+                                ${market_hotspots.job_type_mix[0] ? '('+market_hotspots.job_type_mix[0].pct+'%)' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ${market_hotspots.industry_demand.length ? `
+                        <div class="mt-3 pt-2 border-t border-amber-100 text-xs text-slate-600">
+                            Top industry: ${market_hotspots.industry_demand[0].industry} (${market_hotspots.industry_demand[0].pct}%)
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Card 4: Competitive Edge -->
+                <div class="p-4 bg-gradient-to-br from-rose-50 to-white rounded-xl border border-rose-100 fade-in-up" style="animation-delay: 0.3s">
+                    <h4 class="font-bold text-rose-900 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-rose-600">insights</span>
+                        Your Competitive Edge
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-600 text-sm">Your Tier</span>
+                            <span class="px-2 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full">${competitive_edge.tier}</span>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">Superpower</div>
+                            <div class="text-sm font-bold text-slate-800">${competitive_edge.superpower}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">Key Gap to Close</div>
+                            <div class="text-sm font-bold text-slate-800">${competitive_edge.key_gap}</div>
+                        </div>
+                        <div class="pt-2 border-t border-rose-100 flex items-center justify-between">
+                            <span class="text-slate-600 text-sm">Ready to apply</span>
+                            <span class="text-lg font-bold text-rose-700">${competitive_edge.ready_jobs_count} jobs</span>
+                        </div>
+                        <p class="text-xs text-slate-500 italic">${competitive_edge.next_step}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCareerStrategyEmpty() {
+            document.getElementById('career-strategy').innerHTML = `
+                <div class="col-span-2 text-center py-8">
+                    <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">info</span>
+                    <p class="text-sm text-slate-500">Click "Analyze with AI" to generate your career strategy.</p>
+                </div>
+            `;
+        }
+
+        // ── Auth Check ─────────────────────────────────────────────────────────
+        (async function() {
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {}
+
+            // Load Sidebar
+            fetch('/components/sidebar.html')
+                .then(r => r.text())
+                .then(html => {
+                    const container = document.getElementById('sidebar-container');
+                    container.innerHTML = html;
+                    container.querySelectorAll('script').forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                });
+        })();
+
+        // Show empty state on page load - wait for button click to analyze
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication only
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {}
+            
+            // Show empty state - wait for user to click analyze button
+            showNoData();
+        });
+
+        // AI Analysis Function - runs when button clicked
+        // (hasAnalyzed flag declared above at line 232)
+
+        function renderCommandCenter(resumeData, jobsData) {
+            // Hide radar loading
+            document.getElementById('radar-loading').classList.add('hidden');
+
+            // Update Metrics
+            document.getElementById('total-saved').textContent = resumeData.summary?.jobs_found || 0;
+
+            // Format avg_match (ensures no double %)
+            let avgMatch = resumeData.summary?.avg_match;
+            if (avgMatch === undefined || avgMatch === null || avgMatch === '--') {
+                avgMatch = '--';
+            } else if (typeof avgMatch === 'string' && avgMatch.endsWith('%')) {
+                avgMatch = avgMatch; // already has %
+            } else if (typeof avgMatch === 'number') {
+                avgMatch = avgMatch + '%';
+            } else {
+                avgMatch = avgMatch + '%';
+            }
+            document.getElementById('avg-match').textContent = avgMatch;
+
+            document.getElementById('top-demand').textContent = resumeData.market_insights?.top_demanded?.[0] || '--';
+
+            // Render AI Career Insights (from resume analysis)
+            const insightsCard = document.getElementById('career-insights-card');
+            const careerInsights = resumeData.career_insights;
+            if (careerInsights) {
+                insightsCard.classList.remove('hidden');
+                document.getElementById('ai-recommended-role').textContent = careerInsights.recommended_role || '--';
+                document.getElementById('ai-salary').textContent = careerInsights.salary_insights || '--';
+                
+                // Show strengths as comma-separated
+                const strengths = careerInsights.strengths || [];
+                document.getElementById('ai-strengths').textContent = strengths.slice(0, 3).join('. ') || '--';
+                
+                // Show next steps
+                const nextSteps = careerInsights.next_steps || [];
+                const stepsHtml = nextSteps.slice(0, 4).map(s => `<li>${s}</li>`).join('');
+                document.getElementById('ai-next-steps').innerHTML = stepsHtml || '<li>No specific steps available</li>';
+            } else {
+                insightsCard.classList.add('hidden');
+            }
+
+            // Render Radar Chart (uses resumeData)
+            renderRadarChart(resumeData, jobsData);
+
+            // Render Career Sprint (replaces market clusters)
+            renderCareerStrategy(jobsData.career_strategy);
+
+            // Render Bridge the Gap (uses resumeData)
+            renderBridgeTheGap(resumeData);
+
+            // Load Market Pulse
+            loadMarketPulse();
+        }
+
+        function renderRadarChart(resumeData, searchData) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // Get top 6 skills from skill gaps
+            const skillGaps = resumeData.skill_gaps || [];
+            const labels = skillGaps.slice(0, 6).map(s => s.skill);
+            
+            if (labels.length === 0) {
+                labels = ['Python', 'JavaScript', 'AWS', 'React', 'SQL', 'Docker'];
+            }
+            
+            // Market demand (all 100)
+            const marketData = Array(labels.length).fill(100);
+            
+            // User skills (100 if matched, 20 if missing)
+            const userData = labels.map((label, i) => {
+                const gap = skillGaps[i];
+                if (gap && gap.status === 'matched') return 100;
+                return 25; // Give some credit so chart isn't flat
+            });
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Market Demand',
+                            data: marketData,
+                            borderColor: '#94a3b8',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            backgroundColor: 'transparent',
+                            pointBackgroundColor: '#94a3b8',
+                            pointRadius: 4,
+                        },
+                        {
+                            label: 'Your Skills',
+                            data: userData,
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.3)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#4f46e5',
+                            pointRadius: 5,
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 25,
+                                display: false
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            angleLines: {
+                                color: '#e2e8f0'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                },
+                                color: '#475569'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderBridgeTheGap(resumeData) {
+            const skillGaps = resumeData.skill_gaps || [];
+            const missingSkills = skillGaps.filter(s => s.status === 'missing').slice(0, 4);
+            
+            if (missingSkills.length === 0) {
+                document.getElementById('bridge-gap').innerHTML = `
+                    <div class="col-span-2 text-center py-8">
+                        <span class="material-symbols-outlined text-5xl text-green-500 mb-4">check_circle</span>
+                        <p class="text-lg font-bold text-slate-900">Your Skills Are Market-Ready!</p>
+                        <p class="text-slate-500">No critical skill gaps found. Focus on applying to jobs.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = missingSkills.map((skill, i) => `
+                <div class="pivot-card bg-white rounded-xl border border-amber-200 p-4 fade-in-up" style="animation-delay: ${i * 0.1}s">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-amber-600 text-lg">warning</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">${skill.skill || skill.required}</span>
+                                <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Missing</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                ${skill.action_plan || 'Focus on learning this skill to improve marketability'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('bridge-gap').innerHTML = html;
+        }
+
+        function showNoData() {
+            // Show waiting state in metrics area - don't hide the page structure
+            document.getElementById('total-saved').textContent = '--';
+            document.getElementById('avg-match').textContent = '--%';
+            document.getElementById('top-demand').textContent = '--';
+
+            // Show loading in radar chart area
+            const radarLoading = document.getElementById('radar-loading');
+            if (radarLoading) {
+                radarLoading.classList.remove('hidden');
+                radarLoading.innerHTML = `
+                    <div class="flex flex-col items-center gap-4">
+                        <span class="material-symbols-outlined text-4xl text-indigo-300 animate-pulse">psychology</span>
+                        <p class="text-slate-400 text-sm">Click "Analyze with AI" to get insights</p>
+                    </div>
+                `;
+            }
+
+            // Reset career strategy empty
+            renderCareerStrategyEmpty();
+        }
+
+        // ── Market Pulse Heatmap ───────────────────────────────────────────────────────
+        let currentHeatmapView = 'skills';
+        let marketPulseData = null;
+
+        function getHeatmapColor(percentage, delta) {
+            let bgClass = 'bg-slate-100';
+            if (percentage >= 80) {
+                bgClass = 'bg-pink-500';
+            } else if (percentage >= 60) {
+                bgClass = 'bg-violet-500';
+            } else if (percentage >= 40) {
+                bgClass = 'bg-indigo-500';
+            } else if (percentage >= 20) {
+                bgClass = 'bg-indigo-300';
+            } else {
+                bgClass = 'bg-indigo-100';
+            }
+            return bgClass;
+        }
+
+        function getTrendIcon(trend) {
+            if (trend === 'up') {
+                return '<span class="text-green-600 text-sm">↑</span>';
+            } else if (trend === 'down') {
+                return '<span class="text-red-500 text-sm">↓</span>';
+            } else {
+                return '<span class="text-slate-400 text-sm">→</span>';
+            }
+        }
+
+        function updateHeatmapToggleButtons() {
+            const skillsBtn = document.getElementById('skills-toggle');
+            const titlesBtn = document.getElementById('titles-toggle');
+            if (currentHeatmapView === 'skills') {
+                skillsBtn.className = 'px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors';
+                titlesBtn.className = 'px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors';
+            } else {
+                skillsBtn.className = 'px-3 py-1 text-sm rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors';
+                titlesBtn.className = 'px-3 py-1 text-sm rounded-lg bg-indigo-100 text-indigo-700 font-medium transition-colors';
+            }
+        }
+
+        function setHeatmapView(view) {
+            if (currentHeatmapView === view) return;
+            currentHeatmapView = view;
+            updateHeatmapToggleButtons();
+            loadMarketPulse();
+        }
+
+        async function loadMarketPulse() {
+            const container = document.getElementById('heatmap-container');
+            container.innerHTML = `
+                <div class="col-span-full flex items-center justify-center py-8">
+                    <span class="material-symbols-outlined text-3xl text-indigo-300 animate-pulse">sync</span>
+                    <span class="ml-2 text-sm text-slate-400">Loading ${currentHeatmapView === 'skills' ? 'skill' : 'title'} data...</span>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`/api/resume/market-pulse?view=${currentHeatmapView}`, {
+                    credentials: 'include'
+                });
+                
+                if (!res.ok) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">info</span>
+                            <p class="text-sm text-slate-500">No market data available yet.</p>
+                            <p class="text-xs text-slate-400 mt-1">Search for jobs to see market trends.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const data = await res.json();
+                marketPulseData = data;
+                renderHeatmap(data);
+            } catch (err) {
+                console.error('[Market Pulse] Error:', err);
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-red-300 mb-2">error</span>
+                        <p class="text-sm text-slate-500">Failed to load market data.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderHeatmap(data) {
+            const container = document.getElementById('heatmap-container');
+            if (!data.data || data.data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">info</span>
+                        <p class="text-sm text-slate-500">No ${currentHeatmapView} data available.</p>
+                        <p class="text-xs text-slate-400 mt-1">Search for more jobs to see trends.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Update last updated time
+            if (data.last_updated) {
+                const date = new Date(data.last_updated);
+                document.getElementById('pulse-last-updated').textContent = date.toLocaleTimeString();
+            }
+
+            const items = data.data.slice(0, 16);
+            const html = items.map((item, i) => {
+                const bgClass = getHeatmapColor(item.current_pct, item.delta);
+                const trendIcon = getTrendIcon(item.trend);
+                const textClass = item.current_pct >= 60 ? 'text-white' : 'text-slate-700';
+                
+                return `
+                    <div class="p-3 rounded-xl ${bgClass} transition-all hover:scale-105 cursor-pointer fade-in-up" style="animation-delay: ${i * 0.05}s">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm truncate ${textClass}">${item.name}</span>
+                            ${trendIcon}
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <span class="text-xs ${textClass} opacity-80">${item.current_pct}%</span>
+                            <span class="text-xs ${item.delta >= 0 ? 'text-green-600' : 'text-red-500'}">
+                                ${item.delta > 0 ? '+' : ''}${item.delta}%
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Auto-load on page analysis complete
+        window.loadMarketPulse = loadMarketPulse;
+    </script>
+</body>
+</html>

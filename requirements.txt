@@ -1,0 +1,16 @@
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.31.1      # mcp requires >=0.31.1
+python-multipart>=0.0.9        # required for FastAPI form/file parsing
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+python-jose[cryptography]==3.3.0   # JWT tokens
+bcrypt>=4.0.0                      # password hashing (replaces passlib)
+
+# ── Validation ────────────────────────────────────────────────────────────────
+pydantic[email]>=2.9.0         # request validation + email field support
+
+# ── Agent (bdjobs_agent.py) ───────────────────────────────────────────────────
+browser-use==0.12.5            # browser automation agent framework
+playwright                     # browser driver used by browser-use
+python-dotenv                  # loads .env file for LLM keys

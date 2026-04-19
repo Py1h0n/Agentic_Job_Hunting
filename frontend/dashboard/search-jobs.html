@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Search Jobs | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        "primary-soft": "#eef2ff",
+                        secondary: "#2563eb",
+                        tertiary: "#14b8a6",
+                        background: "#f6f8fc",
+                        card: "#ffffff",
+                        "text-primary": "#0f172a",
+                        "text-secondary": "#475569",
+                        "text-muted": "#94a3b8",
+                        border: "#e2e8f0",
+                        success: "#22c55e",
+                        error: "#ef4444",
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Inter"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --secondary: #2563eb;
+            --tertiary: #14b8a6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+        
+        .job-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            border-color: var(--primary);
+        }
+        
+        .match-badge {
+            font-weight: 700;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .match-high { background: #e0e7ff; color: #4338ca; }
+        .match-medium { background: #dbeafe; color: #1d4ed8; }
+        .match-low { background: #f1f5f9; color: #64748b; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .job-card {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .filter-chip:hover, .filter-chip.active {
+            background: var(--primary-soft);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .filter-chip.secondary {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+        .filter-chip.secondary:hover, .filter-chip.secondary.active {
+            background: #e0e7ff;
+            border-color: #6366f1;
+            color: #4338ca;
+        }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+
+        /* Agent Status Strip */
+        .agent-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .agent-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .agent-pill.running {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.05);
+        }
+        
+        .agent-pill.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #059669;
+        }
+
+        .agent-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+        
+        .agent-status-dot.running {
+            background: #4f46e5;
+            box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+            animation: pulse-dot 1.5s infinite;
+        }
+        
+        .agent-status-dot.completed { background: #10b981; }
+        .agent-status-dot.failed { background: #ef4444; }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        
+        /* Mode Toggle Tabs */
+        .mode-toggle {
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+        }
+        .mode-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .mode-tab:hover {
+            color: #475569;
+        }
+        .mode-tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes shake {
+            0%,100%{transform:translateX(0)}
+            25%{transform:translateX(-4px)}
+            75%{transform:translateX(4px)}
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col overflow-hidden soft-wash">
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'" style="cursor: pointer;">The Curator</h1>
+                <span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">Executive Search</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/dashboard/resume.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="text-sm font-medium">Resume</span>
+                </button>
+                <button onclick="window.location.href='/dashboard/best-matches.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">workspace_premium</span>
+                    <span class="text-sm font-medium">Best Matches</span>
+                </button>
+                <button onclick="window.location.href='/dashboard/saved-jobs.html'" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">bookmark</span>
+                    <span class="text-sm font-medium">Saved</span>
+                </button>
+                <button onclick="showHistory()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">history</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div id="header-avatar">
+                    <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm animate-pulse">...</div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-8 py-8">
+            <!-- Search Control Section - CENTERED -->
+            <div class="max-w-4xl mx-auto mb-8">
+                <!-- Search Bar -->
+                <form id="search-form" onsubmit="handleSearch(event)" class="relative">
+                    <div class="search-bar flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 transition-all">
+                        <span class="material-symbols-outlined text-slate-400 text-2xl">search</span>
+                        <input 
+                            id="search-input" 
+                            type="text" 
+                            placeholder="e.g. Frontend Developer, Remote"  
+                            class="flex-1 text-lg font-medium text-slate-900 placeholder-slate-400 outline-none bg-transparent"
+                            required
+                        />
+                        <div class="flex items-center gap-3">
+                            <!-- Mode Indicator -->
+                            <span id="mode-indicator" class="text-xs font-bold px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full flex items-center gap-1.5">
+                                <span class="text-sm">⚡</span> Turbo
+                            </span>
+                            <button 
+                                type="submit" 
+                                id="search-btn"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 btn-press"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Search Suggestions (Hidden by default) -->
+                    <div id="search-suggestions" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50">
+                        <div class="p-3 border-b border-slate-100">
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Popular Searches</p>
+                        </div>
+                        <div class="py-2">
+                            <button type="button" onclick="setSearchQuery('Frontend Developer')" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">trending_up</span>
+                                Frontend Developer
+                            </button>
+                            <button type="button" onclick="setSearchQuery('Backend Engineer')" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">code</span>
+                                Backend Engineer
+                            </button>
+                            <button type="button" onclick="setSearchQuery('Product Manager')" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">inventory_2</span>
+                                Product Manager
+                            </button>
+                            <button type="button" onclick="setSearchQuery('Data Scientist')" class="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">analytics</span>
+                                Data Scientist
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!-- Agent Selector -->
+                <div class="flex justify-center items-start gap-4 mt-6" id="agent-selector-ui" data-selected="bdjobs">
+                    <!-- Preset Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="setAgents('bdjobs')" id="btn-turbo"
+                                class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all bg-amber-100 border-amber-300 text-amber-700">
+                            ⚡ Turbo
+                        </button>
+                        <button type="button" onclick="setAgents('bdtechjobs,skilljobs,bdjobs')" id="btn-standard"
+                                class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white border-slate-200 text-slate-600 hover:border-indigo-300">
+                            🌊 Standard
+                        </button>
+                        <button type="button" onclick="setAgents('bdjobs,skilljobs,jobmedia,bdtechjobs')" id="btn-deep"
+                                class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white border-slate-200 text-slate-600 hover:border-indigo-300">
+                            🧠 Deep
+                        </button>
+                    </div>
+                    <!-- Dropdown Trigger -->
+                    <div class="relative">
+                        <button type="button" onclick="document.getElementById('dropdown-panel').classList.toggle('hidden')"
+                                class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium hover:border-indigo-300 transition-colors">
+                            <span id="dropdown-label">1 source selected</span>
+                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <!-- Dropdown Panel -->
+                        <div id="dropdown-panel" class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-50">
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="bdjobs" checked onclick="toggleAgent(this)"><span class="text-sm text-slate-700">BDJobs</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="skilljobs" onclick="toggleAgent(this)"><span class="text-sm text-slate-700">Skill.jobs</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="jobmedia" onclick="toggleAgent(this)"><span class="text-sm text-slate-700">Job Media</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="bdtechjobs" onclick="toggleAgent(this)"><span class="text-sm text-slate-700">BD Tech Jobs</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="niyog" onclick="toggleAgent(this)"><span class="text-sm text-slate-700">Niyog</span></label>
+                                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" value="atb" onclick="toggleAgent(this)"><span class="text-sm text-slate-700">ATB Jobs</span></label>
+                            </div>
+                            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                                <button type="button" onclick="setAgents('all')"
+                                        class="flex-1 text-xs text-center py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">Select All</button>
+                                <button type="button" onclick="setAgents('')"
+                                        class="flex-1 text-xs text-center py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                // Direct data attribute approach - simpler and more reliable
+                window.setAgents = function(agentStr) {
+                    var container = document.getElementById('agent-selector-ui');
+                    var checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    var agents = [];
+                    
+                    if (agentStr === 'all') {
+                        // Select All
+                        checkboxes.forEach(function(cb) { cb.checked = true; agents.push(cb.value); });
+                    } else if (agentStr === '') {
+                        // Clear
+                        checkboxes.forEach(function(cb) { cb.checked = false; });
+                    } else if (agentStr.indexOf(',') > -1) {
+                        // Comma-separated list
+                        agents = agentStr.split(',');
+                        // Also infer and set currentMode based on preset
+                        var sorted = [...agents].sort();
+                        if (sorted.length === 1 && sorted[0] === 'bdjobs') {
+                            window.currentMode = 'turbo';
+                        } else if (sorted.length === 3 && JSON.stringify(sorted) === JSON.stringify(['bdjobs', 'bdtechjobs', 'skilljobs'])) {
+                            window.currentMode = 'standard';
+                        } else if (sorted.length === 4 && JSON.stringify(sorted) === JSON.stringify(['bdjobs', 'bdtechjobs', 'jobmedia', 'skilljobs'])) {
+                            window.currentMode = 'deep';
+} else {
+                        // Custom selection - infer from number of agents
+                        if (agents.length >= 3) window.currentMode = 'deep';
+                        else if (agents.length === 1) window.currentMode = 'turbo';
+                        else window.currentMode = 'standard';
+                    }
+                    
+                    checkboxes.forEach(function(cb) { cb.checked = agents.indexOf(cb.value) > -1; });
+                    } else {
+                        // Single agent
+                        agents = [agentStr];
+                        checkboxes.forEach(function(cb) { cb.checked = (cb.value === agentStr); });
+                    }
+                    
+                    // Update label
+                    container.setAttribute('data-selected', agents.join(','));
+                    updateDropdownLabel();
+                    updatePresetStyles();
+                };
+                
+                window.toggleAgent = function(checkbox) {
+                    var container = document.getElementById('agent-selector-ui');
+                    var checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+                    var selected = checkboxes.filter(function(cb) { return cb.checked; }).map(function(cb) { return cb.value; });
+                    container.setAttribute('data-selected', selected.join(','));
+                    
+                    // Update currentMode to match selection
+                    if (selected.length === 1 && selected[0] === 'bdjobs') {
+                        window.currentMode = 'turbo';
+                    } else if (selected.length === 4 && JSON.stringify([...selected].sort()) === JSON.stringify(['bdjobs', 'bdtechjobs', 'jobmedia', 'skilljobs'])) {
+                        window.currentMode = 'deep';
+                    } else if (selected.length >= 3) {
+                        window.currentMode = 'deep';
+                    } else if (selected.length > 0) {
+                        window.currentMode = 'standard';
+                    } else {
+                        window.currentMode = 'turbo';
+                    }
+                    
+                    updateDropdownLabel();
+                    updatePresetStyles();
+                };
+                
+                function updateDropdownLabel() {
+                    var container = document.getElementById('agent-selector-ui');
+                    var selected = container.getAttribute('data-selected') || '';
+                    var count = selected ? selected.split(',').length : 0;
+                    var label = count === 0 ? 'Select sources' : count + ' source' + (count > 1 ? 's' : '') + ' selected';
+                    document.getElementById('dropdown-label').textContent = label;
+                };
+                
+                function updatePresetStyles() {
+                    var container = document.getElementById('agent-selector-ui');
+                    var selected = (container.getAttribute('data-selected') || '').split(',').filter(function(x) { return x; });
+                    var len = selected.length;
+                    
+                    var turboBtn = document.getElementById('btn-turbo');
+                    var stdBtn = document.getElementById('btn-standard');
+                    var deepBtn = document.getElementById('btn-deep');
+                    
+                    var activeClass = 'bg-amber-100 border-amber-300 text-amber-700';
+                    var inactiveClass = 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300';
+                    
+                    var sortedSelected = [...selected].sort().join(',');
+                    
+                    turboBtn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ' + (sortedSelected === 'bdjobs' ? activeClass : inactiveClass);
+                    stdBtn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ' + (sortedSelected === 'bdjobs,bdtechjobs,skilljobs' ? activeClass.replace('amber', 'blue').replace('text-amber', 'text-blue') : inactiveClass);
+                    deepBtn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ' + (sortedSelected === 'bdjobs,bdtechjobs,jobmedia,skilljobs' ? activeClass.replace('amber', 'purple').replace('text-amber', 'text-purple') : inactiveClass);
+                };
+                
+                // Initialize on load
+                updateDropdownLabel();
+                updatePresetStyles();
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    var dropdownPanel = document.getElementById('dropdown-panel');
+                    var dropdownTrigger = document.querySelector('button[onclick*="dropdown-panel"]');
+                    
+                    if (dropdownPanel && !dropdownPanel.classList.contains('hidden')) {
+                        // Check if click was outside both the dropdown panel and trigger button
+                        if (!dropdownPanel.contains(e.target) && !dropdownTrigger.contains(e.target)) {
+                            dropdownPanel.classList.add('hidden');
+                        }
+                    }
+                });
+                </script>
+
+                <!-- Agent Status Strip (Restored) -->
+                <div id="agent-strip" class="agent-strip hidden">
+                    <div id="agent-pills" class="flex flex-wrap items-center justify-center gap-2">
+                        <!-- Pills injected by JS -->
+                    </div>
+                </div>
+            </div>
+            <!-- Recent Searches Collapsible Section -->
+            <div id="recent-searches-section" class="max-w-4xl mx-auto mb-6">
+                <button onclick="toggleRecentSearches()" class="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+                    <span id="recent-chevron" class="material-symbols-outlined transition-transform">expand_more</span>
+                    <span>Recent Searches</span>
+                </button>
+                <div id="recent-searches-list" class="hidden flex flex-wrap gap-2 mt-3">
+                    <!-- Recent search chips injected here -->
+                </div>
+            </div>
+            <!-- Filter Chips and Sort Dropdown -->
+            <div class="max-w-4xl mx-auto mb-6">
+                <div class="flex flex-wrap gap-3 mb-3">
+                    <button class="filter-chip active" data-filter="all">All Results</button>
+                    <button class="filter-chip" data-filter="remote">Remote Only</button>
+                    <button class="filter-chip" data-filter="salary">Salary Available</button>
+                    <button class="filter-chip" data-filter="high-match">80%+ Match</button>
+                    <button class="filter-chip" data-filter="recent">Recently Posted</button>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-3 text-xs">
+                    <button class="filter-chip secondary" data-filter="fulltime">Full Time</button>
+                    <button class="filter-chip secondary" data-filter="internship">Internship</button>
+                    <button class="filter-chip secondary" data-filter="dhaka">Dhaka</button>
+                    <button class="filter-chip secondary" data-filter="chittagong">Chittagong</button>
+                    <button class="filter-chip secondary" data-filter="entry">Entry Level</button>
+                    <button class="filter-chip secondary" data-filter="senior">Senior Level</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <p class="text-sm text-slate-500"><span id="results-count">0</span> opportunities found</p>
+                    <select id="sort-select" class="text-sm border-none bg-transparent text-slate-600 font-medium cursor-pointer outline-none">
+                        <option>Sort by: Best Match</option>
+                        <option>Sort by: Most Recent</option>
+                        <option>Sort by: Highest Salary</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Empty State -->
+            <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center">
+                <div class="w-24 h-24 bg-indigo-50 rounded-3xl flex items-center justify-center text-indigo-600 mb-6">
+                    <span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">search</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Ready for Discovery</h3>
+                <p class="text-slate-500 text-sm max-w-md leading-relaxed">
+                    Enter your job search above. Turbo mode searches 2 sites for speed, while Deep Dive covers all 6 platforms for maximum results.
+                </p>
+            </div>
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="job-card h-48">
+                        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+                        <div class="skeleton h-4 w-1/2 rounded mb-4"></div>
+                        <div class="skeleton h-4 w-full rounded mb-2"></div>
+                        <div class="skeleton h-4 w-2/3 rounded"></div>
+                    </div>
+                    <div class="job-card h-48">
+                        <div class="skeleton h-6 w-3/4 rounded mb-4"></div>
+                        <div class="skeleton h-4 w-1/2 rounded mb-4"></div>
+                        <div class="skeleton h-4 w-full rounded mb-2"></div>
+                        <div class="skeleton h-4 w-2/3 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Results Grid with Filter Chips and Sort Dropdown Functionality -->
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+                <!-- Job cards injected here -->
+            </div>
+        </main>
+    </div>
+    <script>
+        // Auth check on page load
+        (async function() {
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {
+                // Continue on network error
+            }
+        
+            // Load sidebar component
+            document.getElementById('sidebar-container').innerHTML = '<div class="h-full flex items-center justify-center"><span class="material-symbols-outlined text-slate-400 animate-spin">sync</span></div>';
+        fetch('/components/sidebar.html')
+            .then(r => r.text())
+            .then(html => {
+                const container = document.getElementById('sidebar-container');
+                container.innerHTML = html;
+                // Re-execute scripts since innerHTML doesn't execute them
+                container.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                });
+            })
+            .catch(err => {
+                console.error('Failed to load sidebar:', err);
+            });
+        })();
+        
+        // State
+        window.currentMode = 'turbo';
+        let currentSearchIds = [];
+        let currentSessionId = localStorage.getItem('lastSessionId') || null;
+        let searchIdToAgent = {};
+        let pollTimer = null;
+        let allJobs = [];
+        
+        // Load last session on page load - with better error handling and history fallback
+        async function loadLastSession() {
+            // Show loading indicator in search input
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.placeholder = "Loading previous search...";
+            
+            console.log('[Session] Attempting to load last session...');
+            
+            // Verify localStorage is available
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+            } catch (e) {
+                console.error('[Session] localStorage not available:', e);
+                if (searchInput) searchInput.placeholder = "localStorage unavailable";
+                return;
+            }
+            
+            // First try: LocalStorage
+            let sessionId = localStorage.getItem('lastSessionId');
+            console.log('[Session] Stored sessionId:', sessionId);
+            
+            // Second try: Fetch from history API if no stored session
+            if (!sessionId) {
+                try {
+                    const historyRes = await fetch('/api/search/history?limit=1', { credentials: 'include' });
+                    if (historyRes.ok) {
+                        const historyData = await historyRes.json();
+                        console.log('[Session] History response:', historyData);
+                        if (historyData.data && historyData.data.length > 0) {
+                            sessionId = historyData.data[0].session_id;
+                            console.log('[Session] Got sessionId from history:', sessionId);
+                        }
+                    } else {
+                        console.log('[Session] History API error:', historyRes.status);
+                    }
+                } catch (e) {
+                    console.error('[Session] Failed to fetch history:', e);
+                }
+            }
+            
+            if (!sessionId) {
+                console.log('[Session] No session found');
+                if (searchInput) searchInput.placeholder = "e.g. Frontend Developer, Remote";
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/search/history/session/${sessionId}`, {
+                    credentials: 'include'
+                });
+                console.log('[Session] API response status:', res.status);
+                
+                if (!res.ok) {
+                    console.error('[Session] API returned error:', res.status);
+                    localStorage.removeItem('lastSessionId');
+                    return;
+                }
+                
+                const data = await res.json();
+                console.log('[Session] API data:', data);
+                
+                if (data.jobs && data.jobs.length > 0) {
+                    allJobs = data.jobs;
+                    currentSessionId = sessionId;
+                    
+                    // Restore search input
+                    const searchInput = document.getElementById('search-input');
+                    if (searchInput && data.search && data.search.query) {
+                        searchInput.value = data.search.query;
+                    }
+                    
+                    // Show results
+                    const emptyState = document.getElementById('empty-state');
+                    const loadingState = document.getElementById('loading-state');
+                    const resultsGrid = document.getElementById('results-grid');
+                    
+                    if (emptyState) emptyState.classList.add('hidden');
+                    if (loadingState) loadingState.classList.add('hidden');
+                    if (resultsGrid) {
+                        resultsGrid.classList.remove('hidden');
+                        displayJobs(allJobs);
+                    }
+                    
+                    console.log('[Session] SUCCESS - Loaded', allJobs.length, 'jobs');
+                } else {
+                    console.log('[Session] No jobs found in session');
+                }
+            } catch (err) {
+                console.error('[Session] Exception:', err);
+                localStorage.removeItem('lastSessionId');
+            }
+        }
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+        
+        function init() {
+            // Show empty state by default - don't load last session automatically
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('results-grid').classList.add('hidden');
+            
+            // Load recent searches for the dropdown (optional - shows what user can click)
+            loadRecentSearches();
+        }
+        
+        // Load recent searches for display (when user clicks the dropdown)
+        async function loadRecentSearches() {
+            try {
+                const historyRes = await fetch('/api/search/history?limit=10', { credentials: 'include' });
+                if (historyRes.ok) {
+                    const historyData = await historyRes.json();
+                    updateRecentSearchChips(historyData.data || []);
+                }
+            } catch (e) {
+                console.error('Failed to load recent searches:', e);
+            }
+        }
+        
+        // History Store (Vanilla JS pattern)
+        const HistoryStore = {
+            cache: new Map(),
+            listeners: new Set(),
+            pendingRetry: [],
+            
+            subscribe(fn) {
+                this.listeners.add(fn);
+                return () => this.listeners.delete(fn);
+            },
+            
+            notify() {
+                this.listeners.forEach(fn => fn());
+            },
+            
+            async fetchHistory(limit = 50, offset = 0) {
+                try {
+                    const res = await fetch(
+                        `/api/search/history?limit=${limit}&offset=${offset}`,
+                        { credentials: 'include' }
+                    );
+                    if (res.status === 401) {
+                        window.location.href = '/auth/login';
+                        return { data: [], total: 0 };
+                    }
+                    const data = await res.json();
+                    if (data.data) {
+                        data.data.forEach(h => this.cache.set(h.id, h));
+                    }
+                    return data;
+                } catch (err) {
+                    console.error('Failed to fetch history:', err);
+                    return { data: Array.from(this.cache.values()), total: this.cache.size };
+                }
+            },
+            
+            async deleteHistory(historyId) {
+                try {
+                    const res = await fetch(`/api/search/history/${historyId}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        this.cache.delete(historyId);
+                        this.notify();
+                    }
+                    return res.ok;
+                } catch (err) {
+                    this.pendingRetry.push({ action: 'delete', historyId });
+                    return false;
+                }
+            },
+            
+            async loadJobDetails(historyId) {
+                try {
+                    const res = await fetch(`/api/search/history/${historyId}`, {
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        return await res.json();
+                    }
+                } catch (err) {
+                    console.error('Failed to load job details:', err);
+                }
+                return null;
+            },
+            async loadSessionDetails(sessionId) {
+                try {
+                    const res = await fetch(`/api/search/history/session/${sessionId}`, {
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        return await res.json();
+                    }
+                } catch (err) {
+                    console.error('Failed to load session details:', err);
+                }
+                return null;
+            }
+        };
+        
+        // Global Resume Store for sharing resume data across features
+        const ResumeStore = {
+            data: null,
+            skills: [],
+            experience: '',
+            education: [],
+            summary: '',
+            
+            async fetch() {
+                try {
+                    const res = await fetch('/api/resume', { credentials: 'include' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data) {
+                            this.data = data;
+                            this.skills = data.skills || [];
+                            this.experience = data.experience || '';
+                            this.education = data.education || [];
+                            this.summary = data.summary || '';
+                            return data;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch resume:', err);
+                }
+                return null;
+            },
+            
+            hasResume() {
+                return this.data !== null;
+            }
+        };
+        
+        // Retry logic for offline handling
+        async function retryPending(maxRetries = 3) {
+            const items = [...HistoryStore.pendingRetry];
+            HistoryStore.pendingRetry = [];
+            for (const item of items) {
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        if (item.action === 'delete') {
+                            await HistoryStore.deleteHistory(item.historyId);
+                        }
+                        break;
+                    } catch (err) {
+                        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+                    }
+                }
+            }
+        }
+        window.addEventListener('online', retryPending);
+        setInterval(retryPending, 30000);
+        
+        // Agent config - Turbo: single fastest source (bdjobs)
+        const TURBO_AGENTS = ['bdjobs'];
+        // Standard: 3 parallel sources with live streaming
+        const STANDARD_AGENTS = ['bdtechjobs', 'skilljobs', 'bdjobs'];
+        // Deep: 4 sources, semaphore of 2
+         const DEEP_AGENTS = ['bdjobs', 'skilljobs', 'jobmedia', 'bdtechjobs'];
+        
+        const AGENT_LABELS = {
+            bdjobs: 'BD Jobs',
+            skilljobs: 'SkillJobs',
+            jobmedia: 'JobMedia',
+            bdtechjobs: 'BD Tech Jobs',
+            niyog: 'Niyog',
+            atb: 'ATB Jobs'
+        };
+        
+        // Update mode indicator based on selected agents
+        function updateModeIndicator(agents) {
+            const indicator = document.getElementById('mode-indicator');
+            const sorted = (agents || []).slice().sort();
+            let config;
+            if (sorted.length===1 && sorted.includes('bdjobs')) {
+                config = { icon: '⚡', label: 'Turbo', class: 'bg-amber-100 text-amber-700' };
+            } else if (sorted.length===3 && JSON.stringify(sorted)===JSON.stringify(['bdjobs','bdtechjobs','skilljobs'])) {
+                config = { icon: '🌊', label: 'Standard', class: 'bg-blue-100 text-blue-700' };
+             } else if (sorted.length===4 && JSON.stringify(sorted)===JSON.stringify(['bdjobs','bdtechjobs','jobmedia','skilljobs'])) {
+                config = { icon: '🧠', label: 'Deep', class: 'bg-purple-100 text-purple-700' };
+            } else {
+                config = { icon: '🎯', label: 'Custom', class: 'bg-indigo-100 text-indigo-700' };
+            }
+            indicator.innerHTML = `<span class="text-sm">${config.icon}</span> ${config.label}`;
+            indicator.className = `text-xs font-bold px-3 py-1.5 ${config.class} rounded-full flex items-center gap-1.5`;
+        }
+        
+        // Filter chips and Sort dropdown functionality
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                // Handle single-select for primary, toggle for secondary
+                if (chip.classList.contains('secondary')) {
+                    // Toggle secondary filter
+                    chip.classList.toggle('active');
+                } else {
+                    // Single select for primary
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                }
+                applyFiltersAndSort();
+            });
+        });
+
+        // Sort dropdown event listener
+        document.getElementById('sort-select').addEventListener('change', () => {
+            applyFiltersAndSort();
+        });
+
+        function applyFiltersAndSort() {
+            // Get all active filters
+            const activeFilters = document.querySelectorAll('.filter-chip.active');
+            const sortType = document.getElementById('sort-select').value;
+            
+            let filtered = [...allJobs];
+            
+            // Apply ALL active filters (AND logic)
+            activeFilters.forEach(chip => {
+                const filterType = chip.dataset.filter;
+                
+                if (filterType === 'remote') {
+                    filtered = filtered.filter(j => (j.location || '').toLowerCase().includes('remote'));
+                } else if (filterType === 'salary') {
+                    filtered = filtered.filter(j => j.salary && j.salary.trim() && j.salary !== 'Competitive Salary');
+                } else if (filterType === 'high-match') {
+                    filtered = filtered.filter(j => (j.match_score || 0) >= 80);
+                } else if (filterType === 'recent') {
+                    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    filtered = filtered.filter(j => j.created_at ? new Date(j.created_at) > weekAgo : true);
+                } else if (filterType === 'fulltime') {
+                    filtered = filtered.filter(j => (j.job_type || '').toLowerCase().includes('full'));
+                } else if (filterType === 'internship') {
+                    filtered = filtered.filter(j => (j.job_type || '').toLowerCase().includes('intern'));
+                } else if (filterType === 'dhaka') {
+                    filtered = filtered.filter(j => (j.location || '').toLowerCase().includes('dhaka'));
+                } else if (filterType === 'chittagong') {
+                    filtered = filtered.filter(j => (j.location || '').toLowerCase().includes('chittagong') || (j.location || '').toLowerCase().includes('ctg'));
+                } else if (filterType === 'entry') {
+                    filtered = filtered.filter(j => (j.experience || '').toLowerCase().includes('entry') || (j.experience || '').toLowerCase().includes('junior') || (j.experience || '').toLowerCase().includes('0-') || (j.experience || '').toLowerCase().includes('1 year'));
+                } else if (filterType === 'senior') {
+                    filtered = filtered.filter(j => (j.experience || '').toLowerCase().includes('senior') || (j.experience || '').toLowerCase().includes('3+') || (j.experience || '').toLowerCase().includes('5+'));
+                }
+            });
+            
+            // Apply Sort
+            if (sortType.includes('Best Match')) {
+                filtered.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+            } else if (sortType.includes('Recent')) {
+                filtered.sort((a, b) => new Date(b.created_at || b.id) - new Date(a.created_at || a.id));
+            } else if (sortType.includes('Highest Salary')) {
+                const getSal = (s) => parseInt((s || '').replace(/[^0-9]/g, '')) || 0;
+                filtered.sort((a, b) => getSal(b.salary) - getSal(a.salary));
+            }
+            
+            // Render
+            const container = document.getElementById('results-grid');
+            container.innerHTML = '';
+            document.getElementById('results-count').textContent = filtered.length;
+            
+            if (filtered.length === 0) {
+                // Could show a mini "no matches" state here
+            } else {
+                filtered.forEach((job, index) => {
+                    const card = createJobCard(job, index);
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Show/hide recent searches
+        function toggleRecentSearches() {
+            const list = document.getElementById('recent-searches-list');
+            const chevron = document.getElementById('recent-chevron');
+            list.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        // Handle search submit
+        async function handleSearch(e) {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+
+            // Get selected agents from data attribute
+            var container = document.getElementById('agent-selector-ui');
+            var selectedStr = container.getAttribute('data-selected');
+            
+            // Fallback to bdjobs if no attribute or empty
+            if (!selectedStr || selectedStr.trim() === '') {
+                selectedStr = 'bdjobs';
+            }
+            
+            var agents = selectedStr.split(',').filter(function(x) { return x && x.trim(); });
+            
+            if (!agents || agents.length === 0) {
+                agents = ['bdjobs'];
+            }
+
+            // Validate at least one agent selected
+            if (agents.length === 0) {
+                const btn = document.getElementById('search-btn');
+                btn.classList.add('animate-shake');
+                setTimeout(() => btn.classList.remove('animate-shake'), 500);
+                return;
+            }
+
+            const searchBtn = document.getElementById('search-btn');
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
+
+            // Show loading, hide empty state
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('results-grid').classList.add('hidden');
+            document.getElementById('agent-strip').classList.remove('hidden');
+
+            // Initialize agent strip with selected agents
+            renderAgentPills(agents);
+
+            // Update mode indicator
+            updateModeIndicator(agents);
+
+            try {
+                const res = await fetch('/api/search/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        location: '',
+                        max_jobs: 25,
+                        agents: agents,
+                        mode: currentMode  // Include mode as fallback
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    currentSessionId = data.session_id; // Store session ID
+                    localStorage.setItem('lastSessionId', data.session_id); // Persist for page refresh
+                    console.log('[Search] Saved sessionId to localStorage:', data.session_id);
+                    searchIdToAgent = {};
+                    currentSearchIds = [];
+                    
+                    if (data.agent_ids) {
+                        for (const [agent, sid] of Object.entries(data.agent_ids)) {
+                            searchIdToAgent[sid] = agent;
+                            currentSearchIds.push(sid);
+                        }
+                    } else {
+                        currentSearchIds = data.search_ids || [];
+                        const agentsList = agents || TURBO_AGENTS;
+                        currentSearchIds.forEach((sid, i) => {
+                            searchIdToAgent[sid] = agentsList[i];
+                        });
+                    }
+                    
+                    // Trigger history refresh so it shows up in "Recent" immediately
+                    HistoryStore.fetchHistory().then(updateRecentSearchChips);
+                    
+                    console.log('[Search] Search started with session:', data.session_id);
+                    
+                    startPolling();
+                }
+            } catch(err) {
+                console.error(err);
+                showError('Search failed. Please try again.');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+            }
+        }
+        
+        // Render agent pills
+        function renderAgentPills(agents) {
+            const container = document.getElementById('agent-pills');
+            container.innerHTML = '';
+            
+            agents.forEach(agent => {
+                const pill = document.createElement('div');
+                pill.className = 'agent-pill running';
+                pill.dataset.agent = agent;
+                pill.innerHTML = `
+                    <span class="agent-status-dot running"></span>
+                    <span class="text-sm font-medium text-slate-700">${AGENT_LABELS[agent] || agent}</span>
+                    <span class="text-xs text-slate-400">...</span>
+                `;
+                container.appendChild(pill);
+            });
+        }
+
+        // ── SSE Realtime Updates ───────────────────────────────────────────────────
+        let sseConnections = {};
+
+        function connectSSE(searchId) {
+            if (sseConnections[searchId]) return; // Already connected
+            
+            const es = new EventSource(`/api/search/stream/${searchId}`);
+            sseConnections[searchId] = es;
+            
+            es.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    console.log('[SSE]', data);
+
+                    if (data.type === 'jobs_found') {
+                        // Realtime job count update
+                        const total = data.total_so_far;
+                        const agent = data.agent || searchIdToAgent[data.search_id];
+                        const pill = document.querySelector(`.agent-pill[data-agent="${agent}"]`);
+                        if (pill) {
+                            const text = pill.querySelector('span:last-child');
+                            text.textContent = `${total} jobs (${data.count} new)`;
+                        }
+                        
+                        // LIVE: Add jobs from preview to results grid as they come!
+                        if (data.preview && data.preview.length > 0) {
+                            const resultsGrid = document.getElementById('results-grid');
+                            if (resultsGrid) {
+                                resultsGrid.classList.remove('hidden');
+                                data.preview.forEach((job, idx) => {
+                                    // Check if job already added (avoid duplicates)
+                                    const existing = resultsGrid.querySelector(`[data-url="${job.url}"]`);
+                                    if (!existing) {
+                                        const miniCard = document.createElement('div');
+                                        miniCard.className = 'job-card animate-fade-in';
+                                        miniCard.dataset.url = job.url || '';
+                                        miniCard.innerHTML = `
+                                            <div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition">
+                                                <h4 class="font-semibold text-slate-800 text-sm mb-1">${job.title || 'Untitled'}</h4>
+                                                <p class="text-xs text-slate-600">${job.company || ''}</p>
+                                                <p class="text-xs text-slate-500">${job.location || ''}</p>
+                                            </div>
+                                        `;
+                                        resultsGrid.appendChild(miniCard);
+                                    }
+                                });
+                            }
+                        }
+                    } else if (data.type === 'started') {
+                        updateAgentStatus(null, 'running', 0);
+                    } else if (data.type === 'completed') {
+                        updateAgentStatus(data.agent || null, 'completed', data.total);
+                        es.close();
+                        delete sseConnections[searchId];
+                    } else if (data.type === 'failed') {
+                        updateAgentStatus(null, 'failed', 0);
+                        es.close();
+                        delete sseConnections[searchId];
+                    }
+                } catch(err) {
+                    console.error('SSE parse error:', err);
+                }
+            };
+            
+            es.onerror = () => {
+                es.close();
+                delete sseConnections[searchId];
+                // Fall back to polling on error
+                console.log('[SSE] Connection error, falling back to polling');
+            };
+        }
+
+        function disconnectAllSSE() {
+            Object.values(sseConnections).forEach(es => es.close());
+            sseConnections = {};
+        }
+
+        // Update agent status
+        function updateAgentStatus(agent, status, jobsFound) {
+            const pill = document.querySelector(`.agent-pill[data-agent="${agent}"]`);
+            if (!pill) return;
+
+            const dot = pill.querySelector('.agent-status-dot');
+            const text = pill.querySelector('span:last-child');
+
+            if (status === 'completed') {
+                dot.className = 'agent-status-dot completed';
+                pill.classList.remove('running');
+                text.textContent = `${jobsFound} jobs`;
+            } else if (status === 'failed') {
+                dot.className = 'agent-status-dot failed';
+                pill.classList.remove('running');
+                text.textContent = 'Failed';
+            } else if (status === 'running') {
+                dot.className = 'agent-status-dot running';
+                pill.classList.add('running');
+                text.textContent = 'Searching...';
+            }
+        }
+
+        // Start polling for results
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(pollResults, 2000);
+            
+            // Connect SSE for realtime updates
+            currentSearchIds.forEach(sid => connectSSE(sid));
+        }
+
+        // Unified Poll for results via Session
+        async function pollResults() {
+            if (!currentSessionId) return;
+
+            try {
+                const res = await fetch(`/api/search/session/${currentSessionId}/results`, { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    // 1. Update Agent Statuses
+                    if (data.agents) {
+                        data.agents.forEach(agentData => {
+                            updateAgentStatus(agentData.agent, agentData.status, agentData.total_found);
+                        });
+                    }
+                    
+                    // 2. Update Jobs
+                    allJobs = data.results || [];
+                    displayJobs(allJobs);
+                    updateInsights(allJobs);
+
+                    // 3. Check for completion
+                    if (data.status === 'completed' || data.status === 'failed') {
+                        clearInterval(pollTimer);
+                        disconnectAllSSE();
+                        
+                        if (allJobs.length === 0) {
+                            document.getElementById('loading-state').classList.add('hidden');
+                            document.getElementById('results-grid').classList.add('hidden');
+                            // If it's a new search it might need a real 'no-results' message
+                        }
+                    }
+                }
+            } catch(err) {
+                console.error('Polling failed:', err);
+            }
+        }
+
+        // Display jobs
+        function displayJobs(jobs) {
+            if (jobs.length === 0) return;
+
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('results-grid').classList.remove('hidden');
+
+            const container = document.getElementById('results-grid');
+            const existingIds = new Set(Array.from(container.querySelectorAll('.job-card')).map(c => c.dataset.id));
+            
+            document.getElementById('results-count').textContent = jobs.length;
+
+            jobs.forEach((job, index) => {
+                const cardInDom = container.querySelector(`.job-card[data-id="${job.id}"]`);
+                if (!cardInDom) {
+                    const card = createJobCard(job, index);
+                    container.insertBefore(card, container.firstChild);
+                } else {
+                    // Update existing card state if needed (like saved status)
+                    const bookmarkBtn = cardInDom.querySelector('button[title="Save Job"]');
+                    if (bookmarkBtn) {
+                        bookmarkBtn.className = `p-2 ${job.saved ? 'text-amber-500' : 'text-slate-300'} hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all`;
+                        bookmarkBtn.querySelector('span').style.fontVariationSettings = `'FILL' ${job.saved ? '1' : '0'}`;
+                    }
+                }
+            });
+        }
+
+        async function toggleSaveJob(event, jobId) {
+            event.stopPropagation();
+            try {
+                const res = await fetch(`/api/search/jobs/${jobId}/save`, { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    // Update local allJobs state
+                    const job = allJobs.find(j => j.id === jobId);
+                    if (job) job.saved = data.saved;
+                    
+                    // Trigger a re-display to update UI
+                    displayJobs(allJobs);
+                }
+            } catch (err) {
+                console.error('Failed to save job:', err);
+            }
+        }
+        
+        async function deleteJob(event, jobId) {
+            event.stopPropagation();
+            if (!confirm('Are you sure you want to delete this job?')) return;
+            
+            try {
+                const res = await fetch(`/api/search/jobs/${jobId}`, { 
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    // Remove from local allJobs state
+                    allJobs = allJobs.filter(j => j.id !== jobId);
+                    
+                    // Remove card from DOM
+                    const card = document.querySelector(`.job-card[data-id="${jobId}"]`);
+                    if (card) card.remove();
+                    
+                    // Update count
+                    document.getElementById('results-count').textContent = allJobs.length;
+                }
+            } catch (err) {
+                console.error('Failed to delete job:', err);
+            }
+        }
+
+        // Create job card
+        function createJobCard(job, index) {
+            const card = document.createElement('article');
+            card.className = 'job-card';
+            card.dataset.id = job.id;
+            card.style.animationDelay = `${index * 0.1}s`;
+
+            // Match score badge class
+            const matchScore = job.match_score || 75;
+            let matchClass = 'match-medium';
+            if (matchScore >= 80) matchClass = 'match-high';
+            else if (matchScore < 50) matchClass = 'match-low';
+
+            // Company initial
+            const companyInitial = job.company ? job.company.charAt(0).toUpperCase() : '?';
+
+            // Build metadata badges
+            let metadataBadges = '';
+            if (job.job_type) metadataBadges += `<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 bg-blue-50 text-blue-700 rounded-full"><span class="material-symbols-outlined text-xs">schedule</span>${job.job_type}</span>`;
+            if (job.experience) metadataBadges += `<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 bg-green-50 text-green-700 rounded-full"><span class="material-symbols-outlined text-xs">work</span>${job.experience}</span>`;
+            if (job.industry) metadataBadges += `<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 bg-purple-50 text-purple-700 rounded-full"><span class="material-symbols-outlined text-xs">category</span>${job.industry}</span>`;
+
+            // Build requirements preview
+            let requirementsSection = '';
+            if (job.requirements) {
+                const shortReq = job.requirements.length > 120 ? job.requirements.substring(0, 120) + '...' : job.requirements;
+                requirementsSection = `
+                    <div class="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Requirements</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">${shortReq}</p>
+                    </div>
+                `;
+            }
+
+            // Build responsibilities preview
+            let responsibilitiesSection = '';
+            if (job.responsibilities) {
+                const shortResp = job.responsibilities.length > 100 ? job.responsibilities.substring(0, 100) + '...' : job.responsibilities;
+                responsibilitiesSection = `
+                    <div class="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Responsibilities</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">${shortResp}</p>
+                    </div>
+                `;
+            }
+
+            // Build benefits preview
+            let benefitsSection = '';
+            if (job.benefits) {
+                const shortBenefits = job.benefits.length > 100 ? job.benefits.substring(0, 100) + '...' : job.benefits;
+                benefitsSection = `
+                    <div class="mb-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                        <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Benefits</p>
+                        <p class="text-sm text-green-700 leading-relaxed">${shortBenefits}</p>
+                    </div>
+                `;
+            }
+
+            // Build company info
+            let companyInfoSection = '';
+            if (job.company_info) {
+                const shortCompanyInfo = job.company_info.length > 80 ? job.company_info.substring(0, 80) + '...' : job.company_info;
+                companyInfoSection = `
+                    <p class="text-xs text-slate-500 mt-2 flex items-start gap-1">
+                        <span class="material-symbols-outlined text-xs mt-0.5">business</span>
+                        ${shortCompanyInfo}
+                    </p>
+                `;
+            }
+
+            // Build skills tags
+            let skillsSection = '';
+            if (job.skills) {
+                const skills = job.skills.split(',').filter(s => s.trim());
+                skillsSection = `
+                    <div class="flex flex-wrap gap-1.5 mb-4">
+                        ${skills.slice(0, 5).map(s => `<span class="text-xs font-medium px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full">${s.trim()}</span>`).join('')}
+                        ${skills.length > 5 ? `<span class="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">+${skills.length - 5}</span>` : ''}
+                    </div>
+                `;
+            }
+
+            // Build deadline badge
+            let deadlineBadge = '';
+            if (job.deadline) {
+                deadlineBadge = `
+                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 bg-red-50 text-red-700 rounded-full">
+                        <span class="material-symbols-outlined text-xs">event</span>
+                        Deadline: ${job.deadline}
+                    </span>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-lg">
+                            ${companyInitial}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg leading-tight mb-1 cursor-pointer hover:text-indigo-600 transition-colors" onclick="openJobDetail(${job.id})">${job.title || 'Job Title'}</h3>
+                            <p class="text-sm text-slate-600 font-medium">${job.company || 'Company Name'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleSaveJob(event, ${job.id})" class="p-2 ${job.saved ? 'text-amber-500' : 'text-slate-300'} hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Save Job">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${job.saved ? '1' : '0'};">bookmark</span>
+                        </button>
+                        <button onclick="deleteJob(event, ${job.id})" class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Job">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                        <span class="match-badge ${matchClass}">${matchScore}%</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <p class="text-sm text-slate-500 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">location_on</span>
+                        ${job.location || 'Remote'}
+                    </p>
+                    ${companyInfoSection}
+                </div>
+                
+                <!-- Metadata Badges -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${metadataBadges}
+                    ${deadlineBadge}
+                </div>
+                
+                <!-- Detailed Sections -->
+                ${requirementsSection}
+                ${responsibilitiesSection}
+                ${benefitsSection}
+                
+                <!-- Skills -->
+                ${skillsSection}
+                
+                <!-- Salary and Actions -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100 mt-auto">
+                    <span class="text-sm font-semibold text-indigo-600 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">payments</span>
+                        ${job.salary || 'Competitive Salary'}
+                    </span>
+                    <div class="flex gap-2">
+                        ${ResumeStore.hasResume() ? `
+                        <button onclick="analyzeJobMatch(${job.id}, this)" class="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="AI Insight">
+                            <span class="material-symbols-outlined text-lg">psychology</span>
+                        </button>
+                        ` : ''}
+                        <a href="${job.url || '#'}" target="_blank" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-indigo-600 transition-all flex items-center gap-2 shadow-sm">
+                            Apply
+                            <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        </a>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // Update insights panel
+        function updateInsights(jobs) {
+            document.getElementById('insight-jobs').textContent = jobs.length;
+            
+            if (jobs.length > 0) {
+                const scores = jobs.filter(j => j.match_score).map(j => j.match_score);
+                const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+                document.getElementById('insight-avg-match').textContent = avg + '%';
+                
+                // Top skill
+                const skillCounts = {};
+                jobs.forEach(job => {
+                    if (job.skills) {
+                        job.skills.split(',').forEach(s => {
+                            const skill = s.trim();
+                            if (skill) skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+                        });
+                    }
+                });
+
+                const sortedSkills = Object.entries(skillCounts)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([skill]) => skill);
+                
+                document.getElementById('insight-top-skill').textContent = sortedSkills[0] || '--';
+            } else {
+                document.getElementById('insight-avg-match').textContent = '--';
+                document.getElementById('insight-top-skill').textContent = '--';
+            }
+        }
+
+        // Render agent pills on load - use default agents
+        renderAgentPills(['bdjobs']);
+
+        // Helper to update chips - handles both array and object with data property
+        function updateRecentSearchChips(data) {
+            const container = document.getElementById('recent-searches-list');
+            // Handle both cases: data could be an array or { data: [...] }
+            let items = Array.isArray(data) ? data : (data.data || []);
+            if (items.length === 0) return;
+            
+            container.innerHTML = items.slice(0, 6).map(h => `
+                <button onclick="loadHistoryDetail('${h.session_id}')" class="filter-chip">
+                    ${h.query}
+                </button>
+            `).join('');
+            document.getElementById('recent-searches-section').classList.remove('hidden');
+        }
+
+        // Initial history load
+        (async () => {
+            const data = await HistoryStore.fetchHistory();
+            const historyList = document.getElementById('history-list');
+            
+            updateRecentSearchChips(data);
+
+            if (historyList) {
+                if (!data.data || data.data.length === 0) {
+                    historyList.innerHTML = '<p class="text-sm text-slate-400 p-4">No search history yet</p>';
+                } else {
+                    historyList.innerHTML = data.data.map(h => `
+                        <div class="flex items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer" onclick="loadHistoryDetail('${h.session_id}')">
+                            <div>
+                                <p class="font-medium text-slate-900">${h.query || 'Untitled search'}</p>
+                                <p class="text-xs text-slate-400">${h.total_found || 0} jobs · ${formatDate(h.created_at)}</p>
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteHistoryItemBySession('${h.session_id}')" class="p-2 text-slate-400 hover:text-red-500 rounded-lg">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            // Populate history panel
+            const panel = document.getElementById('history-panel-section');
+            const container = document.getElementById('history-list-panel');
+            panel.classList.remove('hidden');
+            container.innerHTML = '';
+            data.data.forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'mb-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50';
+                div.onclick = () => loadHistoryDetail(h.session_id);
+                div.innerHTML = `
+                    <p class="font-medium text-slate-900">${h.query}</p>
+                    <p class="text-sm text-slate-500">${h.total_found || 0} jobs found · ${formatDate(h.created_at)}</p>
+                `;
+                container.appendChild(div);
+            });
+
+            // Auto-load most recent search session if no search is active
+            if (data.data && data.data.length > 0 && allJobs.length === 0) {
+                const latest = data.data[0];
+                loadHistoryDetail(latest.session_id);
+            }
+        })();
+
+        // Format date helper
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Delete history item
+        async function deleteHistoryItem(historyId) {
+            if (!confirm('Delete this search history?')) return;
+            const success = await HistoryStore.deleteHistory(historyId);
+            if (success) {
+                loadHistoryForPanel();
+            }
+        }
+
+        // Load history for panel section
+        async function loadHistoryForPanel() {
+            const panel = document.getElementById('history-panel-section');
+            const container = document.getElementById('history-list-panel');
+            panel.classList.remove('hidden');
+            container.innerHTML = '<p class="text-sm text-slate-400 p-4">Loading...</p>';
+            
+            const data = await HistoryStore.fetchHistory();
+            container.innerHTML = '';
+            data.data.forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'mb-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50';
+                div.onclick = () => loadHistoryDetail(h.session_id);
+                div.innerHTML = `
+                    <p class="font-medium text-slate-900">${h.query}</p>
+                    <p class="text-sm text-slate-500">${h.total_found || 0} jobs found · ${formatDate(h.created_at)}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Analyze job match
+        async function analyzeJobMatch(jobId, btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">sync</span>';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`/api/resume/match/${jobId}`, { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    const matched = data.matched_skills || [];
+                    const missing = data.missing_skills || [];
+                    
+                    let html = '<div class="space-y-2 mb-4">';
+                    if (matched.length > 0) {
+                        html += '<p class="text-sm font-medium text-green-700">Matched skills:</p>';
+                        html += '<div class="flex flex-wrap gap-1.5">';
+                        matched.slice(0, 5).forEach(s => {
+                            html += `<span class="text-xs font-medium px-2 py-1 bg-green-50 text-green-700 rounded-full">${s}</span>`;
+                        });
+                        html += '</div>';
+                    }
+                    if (missing.length > 0) {
+                        html += '<p class="text-sm font-medium text-amber-700 mt-3">Missing skills:</p>';
+                        html += '<div class="flex flex-wrap gap-1.5">';
+                        missing.slice(0, 5).forEach(s => {
+                            html += `<span class="text-xs font-medium px-2 py-1 bg-amber-50 text-amber-700 rounded-full">${s}</span>`;
+                        });
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                    
+                    const rating = data.score || 0;
+                    let ratingClass = 'match-medium';
+                    if (rating >= 80) ratingClass = 'match-high';
+                    else if (rating < 50) ratingClass = 'match-low';
+                    
+                    html += `<div class="flex items-center gap-2 mt-3"><span class="match-badge ${ratingClass}">${rating}% Match</span></div>`;
+                    
+                    const card = btn.closest('.job-card');
+                    let detailSection = card.querySelector('.job-detail-section');
+                    if (!detailSection) {
+                        detailSection = document.createElement('div');
+                        detailSection.className = 'job-detail-section mt-3 pt-3 border-t border-slate-100';
+                        card.appendChild(detailSection);
+                    }
+                    detailSection.innerHTML = html;
+                }
+            } catch(err) {
+                console.error(err);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Toggle save job
+        async function toggleSave(jobId, btn) {
+            try {
+                await fetch(`/api/search/jobs/${jobId}/save`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                btn.classList.toggle('text-indigo-600');
+                btn.classList.toggle('bg-indigo-50');
+                btn.innerHTML = `
+                    <span class="material-symbols-outlined">${btn.classList.contains('text-indigo-600') ? 'bookmark' : 'bookmark_border'}</span>
+                `;
+            } catch(err) {
+                console.error('Failed to toggle save:', err);
+            }
+        }
+        
+        // Export all data
+        async function exportAllData() {
+            try {
+                const res = await fetch('/api/search/history/export', { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `the-curator-export-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            } catch(err) {
+                console.error('Export failed:', err);
+            }
+        }
+
+        // Delete all data
+        async function deleteAllData() {
+            if (!confirm('Are you sure? This will permanently delete all your data including searches, saved jobs, and resume.')) {
+                return;
+            }
+            if (!confirm('This action cannot be undone. Continue?')) {
+                return;
+            }
+            
+            try {
+                await fetch('/api/search/history', {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                window.location.href = '/auth/login';
+            } catch(err) {
+                console.error('Delete failed:', err);
+            }
+        }
+        
+        // Logout
+        function logout() {
+            document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            window.location.href = '/auth/login';
+        }
+
+        // Expose functions to global scope
+        window.setSearchQuery = (query) => {
+            document.getElementById('search-input').value = query;
+            document.getElementById('search-suggestions').classList.add('hidden');
+        };
+        window.toggleRecentSearches = toggleRecentSearches;
+        window.showHistory = () => {
+            document.getElementById('history-panel-section').scrollIntoView({ behavior: 'smooth' });
+            loadHistoryForPanel();
+        };
+        window.loadHistoryDetail = async (sessionId) => {
+            // UI Feedback
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('results-grid').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('agent-strip').classList.add('hidden');
+            
+            const data = await HistoryStore.loadSessionDetails(sessionId);
+            if (data) {
+                // Update search UI
+                const searchData = data.search;
+                const jobs = data.jobs || [];
+                
+                document.getElementById('search-input').value = searchData.query || '';
+                
+                // Store session ID for future reference
+                currentSessionId = sessionId;
+                localStorage.setItem('lastSessionId', sessionId);
+                
+                // Update Grid
+                allJobs = jobs;
+                displayJobs(allJobs);
+                updateInsights(allJobs);
+                
+                // Ensure results grid is shown
+                document.getElementById('loading-state').classList.add('hidden');
+                if (allJobs.length > 0) {
+                    document.getElementById('results-grid').classList.remove('hidden');
+                    // Scroll to results if not already in view
+                    if (window.scrollY > 200) {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                } else {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                }
+            }
+        };
+
+        window.deleteHistoryItemBySession = async (sessionId) => {
+            if (!confirm('Delete this entire search session?')) return;
+            // For deletion, we can just delete one of the IDs in the session and backend will handle the rest
+            // or we could add a dedicated session delete endpoint. 
+            // Let's use the first SID we find in history for that session or update backend.
+            // Simplified: we'll call the history delete with the session_id if we update backend.
+            // I'll update the backend delete_history to take session_id if it's a string.
+            
+            const res = await fetch(`/api/search/history/session/${sessionId}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadHistoryForPanel();
+            }
+        };
+        window.analyzeJobMatch = analyzeJobMatch;
+        window.toggleSave = toggleSave;
+        window.exportAllData = exportAllData;
+        window.deleteAllData = deleteAllData;
+        window.logout = logout;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Already initialized above
+        });
+    </script>
+</body>
+</html>

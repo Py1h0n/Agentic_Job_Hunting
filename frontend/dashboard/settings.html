@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Settings | The Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        "primary-soft": "#eef2ff",
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Inter"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-page: #f6f8fc;
+            --bg-card: #ffffff;
+            --primary: #4f46e5;
+            --primary-soft: #eef2ff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-page);
+        }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        
+        .soft-wash {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f5ff 100%);
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex overflow-hidden h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden soft-wash">
+        <!-- Header -->
+        <header class="px-8 py-5 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200/50">
+            <div class="flex items-center gap-4">
+                <h1 class="font-manrope font-black text-indigo-700 text-2xl tracking-tighter cursor-pointer" onclick="window.location.href='/'">The Curator</h1>
+                <span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">Settings</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="header-avatar">
+                    <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm animate-pulse">...</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto px-8 py-8">
+            <div class="max-w-2xl mx-auto">
+                <!-- Account Section -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-6">
+                    <h2 class="font-bold text-xl text-slate-900 mb-4">Account Settings</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between py-3 border-b border-slate-100">
+                            <div>
+                                <p class="font-medium text-slate-900">Email</p>
+                                <p class="text-sm text-slate-500" id="user-email">Loading...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between py-3 border-b border-slate-100">
+                            <div>
+                                <p class="font-medium text-slate-900">Plan</p>
+                                <p class="text-sm text-slate-500" id="user-plan">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resume Information Section -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-bold text-xl text-slate-900 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">description</span>
+                            Resume Information
+                        </h2>
+                        <button onclick="window.location.href='/dashboard/resume.html'" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                            Update
+                        </button>
+                    </div>
+                    <div id="resume-overview">
+                        <!-- Populated by JS -->
+                        <div class="flex items-center justify-center py-8">
+                            <span class="material-symbols-outlined animate-spin text-slate-400">sync</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management Section -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-6">
+                    <h2 class="font-bold text-xl text-slate-900 mb-4">Data Management</h2>
+                    
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <p class="text-sm text-amber-800 mb-3">This will permanently delete all your saved jobs and search history. This action cannot be undone.</p>
+                            <button onclick="deleteAllSearches()" class="w-full py-3 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">delete_forever</span>
+                                Delete All Search Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <h2 class="font-bold text-xl text-slate-900 mb-4">Actions</h2>
+                    
+                    <div class="space-y-3">
+                        <button onclick="logout()" class="w-full py-3 px-4 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">logout</span>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function deleteAllSearches() {
+            if (!confirm('Are you sure you want to DELETE ALL your search results? This cannot be undone!')) return;
+            if (!confirm('This will permanently delete ALL jobs and search history. Type "DELETE" to confirm.')) return;
+            
+            const userConfirm = prompt('Type DELETE to confirm:');
+            if (userConfirm !== 'DELETE') {
+                alert('Cancelled. You did not type DELETE.');
+                return;
+            }
+            
+            try {
+                // Delete all jobs via bulk delete
+                const res = await fetch('/api/search/jobs/bulk-delete-all', { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    alert('All search results have been deleted.');
+                } else {
+                    alert('Error deleting data. Please try again.');
+                }
+            } catch (err) {
+                console.error('Delete failed:', err);
+                alert('Error: ' + err.message);
+            }
+        }
+        
+        function logout() {
+            document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            window.location.href = '/auth/login';
+        }
+
+        // --- Resume overview functions ---
+        async function loadResumeOverview() {
+            try {
+                const res = await fetch('/api/resume', { credentials: 'include' });
+                if (res.ok) {
+                    const resume = await res.json();
+                    if (resume && (resume.skills || resume.summary)) {
+                        renderResumeOverview(resume);
+                    } else {
+                        showNoResume();
+                    }
+                } else {
+                    showNoResume();
+                }
+            } catch (err) {
+                console.error('Failed to load resume for overview:', err);
+                showNoResume();
+            }
+        }
+
+        function renderResumeOverview(resume) {
+            const container = document.getElementById('resume-overview');
+            if (!resume) { showNoResume(); return; }
+            let html = '';
+
+            // Title, Location, Desired Role row
+            if (resume.title || resume.location || resume.desired_role) {
+                html += `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">`;
+                if (resume.title) {
+                    html += `<div><p class="text-xs text-slate-500 uppercase mb-1">Current Role</p><p class="font-medium text-slate-800">${resume.title}</p></div>`;
+                }
+                if (resume.location) {
+                    html += `<div><p class="text-xs text-slate-500 uppercase mb-1">Location</p><p class="font-medium text-slate-800">${resume.location}</p></div>`;
+                }
+                if (resume.desired_role) {
+                    html += `<div><p class="text-xs text-slate-500 uppercase mb-1">Desired Role</p><p class="font-medium text-slate-800">${resume.desired_role}</p></div>`;
+                }
+                html += `</div>`;
+            }
+
+            // Summary
+            if (resume.summary) {
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Professional Summary</h4>
+                    <p class="text-slate-700 leading-relaxed">${resume.summary}</p>
+                </div>`;
+            }
+
+            // Experience
+            if (resume.experience) {
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Total Experience</h4>
+                    <p class="text-slate-800">${resume.experience}</p>
+                </div>`;
+            }
+
+            // Education
+            if (resume.education && resume.education.length) {
+                const items = resume.education.map(e => {
+                    const deg = e.degree || '';
+                    const inst = e.institution || '';
+                    const yr = e.year || '';
+                    return `${deg}${inst ? ' - ' + inst : ''}${yr ? ' (' + yr + ')' : ''}`;
+                }).join('</li><li class="text-slate-700">');
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Education</h4>
+                    <ul class="list-disc list-inside text-slate-700 space-y-1"><li>${items}</li></ul>
+                </div>`;
+            }
+
+            // Skills
+            if (resume.skills && resume.skills.length) {
+                const skillsHtml = resume.skills.map(s =>
+                    `<span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100">${s}</span>`
+                ).join('');
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Skills</h4>
+                    <div class="flex flex-wrap gap-2">${skillsHtml}</div>
+                </div>`;
+            }
+
+            // Achievements
+            if (resume.achievements && resume.achievements.length) {
+                const achItems = resume.achievements.map(a =>
+                    `<li class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+                        <span class="text-slate-700">${a}</span>
+                    </li>`
+                ).join('');
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Key Achievements</h4>
+                    <ul class="space-y-2">${achItems}</ul>
+                </div>`;
+            }
+
+            // Certifications
+            if (resume.certifications && resume.certifications.length) {
+                const certItems = resume.certifications.map(c =>
+                    `<span class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium border border-slate-200">${c}</span>`
+                ).join('');
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Certifications</h4>
+                    <div class="flex flex-wrap gap-2">${certItems}</div>
+                </div>`;
+            }
+
+            // Languages
+            if (resume.languages && resume.languages.length) {
+                const langItems = resume.languages.map(l =>
+                    `<div class="flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
+                        <span class="text-slate-700">${l.language}</span>
+                        <span class="text-sm text-slate-500 capitalize">${l.proficiency}</span>
+                    </div>`
+                ).join('');
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Languages</h4>
+                    <div>${langItems}</div>
+                </div>`;
+            }
+
+            // Soft Skills & Tools
+            if ((resume.soft_skills && resume.soft_skills.length) || (resume.tools && resume.tools.length)) {
+                html += `<div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Soft Skills</h4>
+                    <div class="flex flex-wrap gap-2 mb-4">`;
+                if (resume.soft_skills && resume.soft_skills.length) {
+                    html += resume.soft_skills.map(s =>
+                        `<span class="inline-flex items-center gap-1 px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-sm font-medium border border-teal-100">${s}</span>`
+                    ).join('');
+                }
+                html += `</div>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-2">Tools & Technologies</h4>
+                    <div class="flex flex-wrap gap-2">`;
+                if (resume.tools && resume.tools.length) {
+                    html += resume.tools.map(t =>
+                        `<span class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium border border-slate-200">${t}</span>`
+                    ).join('');
+                }
+                html += `</div></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function showNoResume() {
+            const container = document.getElementById('resume-overview');
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-slate-400 text-3xl">description</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">No Resume Uploaded</h3>
+                    <p class="text-slate-500 mb-4">Upload your resume to see AI-extracted information here.</p>
+                    <a href="/dashboard/resume.html" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Upload Resume
+                    </a>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Auth check
+            try {
+                const authCheck = await fetch('/api/resume/status', { credentials: 'include' });
+                if (authCheck.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+            } catch (e) {
+                // Continue on network error
+            }
+            
+            // Load sidebar with script execution
+            fetch('/components/sidebar.html')
+                .then(r => r.text())
+                .then(html => {
+                    const container = document.getElementById('sidebar-container');
+                    container.innerHTML = html;
+                    // Re-execute scripts since innerHTML doesn't execute them
+                    container.querySelectorAll('script').forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                })
+                .catch(err => console.error('Failed to load sidebar:', err));
+                
+            // Load user info
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+                if (res.ok) {
+                    const user = await res.json();
+                    document.getElementById('user-email').textContent = user.email || '';
+                    // Also update plan text if element exists
+                    const planEl = document.querySelector('#user-plan');
+                    if (planEl) planEl.textContent = (user.plan || 'Free') + ' Plan';
+                } else {
+                    document.getElementById('user-email').textContent = 'Not signed in';
+                }
+            } catch (e) {
+                document.getElementById('user-email').textContent = 'Unable to load';
+            }
+
+            // Load resume overview
+            await loadResumeOverview();
+        });
+    </script>
+</body>
+</html>
